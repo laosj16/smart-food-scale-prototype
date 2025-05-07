@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能食物秤 Pro - 交互原型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/flowbite"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox@3.4.0/dist/glightbox.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1f2937;
+            padding: 2rem;
+        }
+        
+        .page-container {
+            max-width: 800px;
+            margin: 1.5rem auto;
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            @apply text-2xl font-bold mb-4 text-gray-900 text-center;
+        }
+        
+        p {
+            @apply text-center text-gray-500 mb-8;
+        }
+        
+        /* 树状结构样式 */
+        .tree {
+            list-style: none;
+            padding-left: 1.5rem;
+        }
+        
+        .tree li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tree li::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -1rem;
+            width: 1px;
+            height: 100%;
+            background-color: #cbd5e1;
+        }
+        
+        .tree li:last-child::before {
+            height: 0.8em;
+        }
+        
+        .tree li::after {
+            content: '';
+            position: absolute;
+            top: 0.6em;
+            left: -1rem;
+            width: 0.8rem;
+            height: 1px;
+            background-color: #cbd5e1;
+        }
+        
+        .tree > li::before,
+        .tree > li::after {
+            display: none;
+        }
+        
+        .tree a {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.25rem;
+            color: #334155;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        
+        .tree a:hover {
+            background-color: #eef2ff;
+            border-color: #c7d2fe;
+            transform: translateX(2px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        <h1 class="text-2xl font-bold mb-2 text-gray-800">多功能食物秤 - 原型目录</h1>
+        <p class="text-sm text-gray-500 mb-6">产品中心-胡中华</p>
+
+        <h2 class="text-lg font-semibold mb-3 text-indigo-700">原型页面结构:</h2>
+        <ul class="tree">
+            <li>
+                <a href="main_menu.html">主菜单 (Main Menu)</a>
+                <ul>
+                    <li><a href="general_weighing.html">通用称重 (General Weighing)</a></li>
+                    <li>
+                        <a href="coffee_scale_menu.html">咖啡秤 (Coffee Scale)</a>
+                        <ul>
+                            <li><a href="coffee_pour_over.html">手冲模式 1</a></li>
+                            <li><a href="coffee_pour_over_2.html">手冲模式 2</a></li>
+                            <li><a href="coffee_espresso.html">意式模式 1</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="nutrition_scale.html">营养秤 (Nutrition Scale)</a></li>
+                    <li>
+                        <a href="timed_weighing.html">倒计时 (Countdown Timer)</a>
+                    </li>
+                    <li>
+                        <a href="settings_menu.html">设置 (Settings)</a>
+                        <ul>
+                            <li><a href="settings_brightness.html">亮度设置</a></li>
+                            <li><a href="settings_sound.html">声音设置</a></li>
+                            <li><a href="settings_factory_reset.html">恢复出厂设置</a></li>
+                            <li><a href="settings_about.html">关于设备</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    </body>
+</html>

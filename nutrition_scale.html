@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>营养秤模式 - 智能食物秤 Pro</title> <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles */
+        body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding-bottom: 80px; }
+        .device-screen {
+    width: 100%;
+    max-width: 480px;
+    aspect-ratio: 4/3;
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+        /* Status Bar */
+        .status-bar { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background-color: rgba(0, 0, 0, 0.2); flex-shrink: 0; height: 36px; position: relative; }
+        .status-bar i { font-size: 18px; color: #e0e0e0; line-height: 1; }
+        #status-prompt { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 15px; color: #a0a0a0; white-space: nowrap; max-width: calc(100% - 80px); overflow: hidden; text-overflow: ellipsis; }
+
+        /* Main Content Area */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* Food Selection Grid - Optimized for 460x280px screen */
+        #food-selection {
+    width: 100%;
+    max-width: 460px;
+    height: 280px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+        #food-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 460px;
+    height: 280px;
+    padding: 15px;
+    box-sizing: border-box;
+}
+        .food-item {
+            background-color: #333;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 12px;
+            padding: 5px;
+            border: 2px solid transparent;
+            transition: all 0.2s ease-out;
+            cursor: default;
+            overflow: hidden;
+        }
+         .food-item i {
+             font-size: 24px;
+             margin-bottom: 4px;
+             color: #b0b0b0;
+             transition: color 0.2s ease;
+         }
+        .food-item.selected {
+            transform: scale(1.1);
+            border-color: #3b82f6;
+            background-color: #2563eb;
+            z-index: 2;
+            font-weight: bold;
+        }
+         .food-item.selected i {
+             color: #ffffff;
+         }
+
+
+        /* Nutrition Display Area */
+        .nutrition-display { width: 100%; max-width: 95%; display: flex; flex-direction: column; align-items: center; height: 100%; overflow: hidden; padding: 0 5px; box-sizing: border-box; }
+        /* Primary Weight Display */
+        .weight-display-nutrition { display: flex; justify-content: center; align-items: baseline; margin-bottom: 8px; width: 100%; flex-shrink: 0; }
+        .weight-value { font-size: 64px; font-weight: 700; color: #ffffff; line-height: 1; }
+        .weight-unit { font-size: 22px; font-weight: 500; color: #a0a0a0; margin-left: 6px; transition: color 0.3s ease; }
+        .unit-g { color: #60a5fa; } .unit-ml { color: #34d399; } .unit-oz { color: #fbbf24; } .unit-lb { color: #f87171; } .unit-lb-oz { color: #c084fc; }
+
+        /* Nutrient Grid Container - Hide scrollbar */
+        #nutrient-grid-container { flex-grow: 1; width: 100%; overflow-y: auto; padding: 5px 0; scrollbar-width: none; -ms-overflow-style: none; }
+        #nutrient-grid-container::-webkit-scrollbar { display: none; }
+        /* Nutrient Grid */
+        #nutrient-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+        /* Nutrient Grid Item */
+        .nutrient-grid-item { background-color: rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 8px; text-align: center; }
+        .nutrient-grid-name { font-size: 13px; color: #b0b0b0; margin-bottom: 3px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .nutrient-grid-value { font-size: 18px; color: #ffffff; font-weight: 600; }
+        .nutrient-grid-unit { font-size: 12px; color: #a0a0a0; margin-left: 3px; }
+
+
+        /* TARE Indicator */
+        .tare-indicator { position: absolute; top: 50%; transform: translateY(-50%); left: 15px; background-color: #007AFF; color: white; padding: 3px 8px; border-radius: 5px; font-size: 14px; font-weight: bold; opacity: 0; transition: opacity 0.2s ease-out; z-index: 5; white-space: nowrap; }
+        .tare-indicator.visible { opacity: 1; }
+
+        /* Hide elements by default */
+        .hidden { display: none !important; }
+
+        /* Hint Bar */
+        .hint-bar { text-align: center; padding: 8px 10px 12px 10px; background-color: rgba(0, 0, 0, 0.3); font-size: 15px; color: #b0b0b0; flex-shrink: 0; height: 36px; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Overlays and Progress Ring Styles */
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; z-index: 10; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease; }
+        .overlay.visible { opacity: 1; visibility: visible; }
+        .progress-ring { position: relative; width: 90px; height: 90px; margin-bottom: 1rem; }
+        .progress-ring__circle { transition: 0.1s stroke-dashoffset linear, 0.2s stroke ease; transform: rotate(-90deg); transform-origin: 50% 50%; }
+        .progress-ring__svg circle { stroke-width: 6; }
+        .progress-ring__svg .progress-ring__circle--background { r: 42; cx: 45; cy: 45; stroke: #555;}
+        .progress-ring__svg .progress-ring__circle { r: 42; cx: 45; cy: 45; }
+        .progress-ring__text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; font-weight: bold; }
+        #long-press-action-text { font-size: 1.1rem; text-align: center; padding: 0 10px;}
+        @keyframes blink-color { 0%, 100% { color: #facc15; } 50% { color: #ffffff; } }
+        .blink-text { animation: blink-color 1s infinite; font-weight: bold; }
+        #power-off-confirm-overlay .confirm-options { display: flex; gap: 20px; margin-top: 20px; }
+        #power-off-confirm-overlay .option { padding: 8px 16px; border: 2px solid #555; border-radius: 6px; cursor: default; transition: background-color 0.2s, border-color 0.2s; }
+        #power-off-confirm-overlay .option.selected { background-color: #007AFF; border-color: #0056b3; }
+
+        /* Interaction Controls Styles */
+        .interaction-controls { position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(240, 240, 240, 0.95); backdrop-filter: blur(5px); padding: 0.75rem 1rem; border-top: 1px solid #ccc; display: flex; justify-content: center; align-items: center; gap: 0.5rem; z-index: 100; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); }
+        .control-button { padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 500; background-color: #4f46e5; color: white; border: none; border-radius: 0.375rem; cursor: pointer; transition: background-color 0.2s ease, transform 0.1s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .control-button:hover { background-color: #4338ca; }
+        .control-button:active { transform: scale(0.95); }
+        .control-button.secondary { background-color: #64748b; }
+        .control-button.secondary:hover { background-color: #475569; }
+        .control-button:disabled { background-color: #9ca3af; cursor: not-allowed; opacity: 0.7; }
+    </style>
+</head>
+<body>
+
+    <div class="device-screen">
+        <div class="status-bar">
+            <i class="fa-brands fa-bluetooth-b"></i>
+            <span id="status-prompt"></span>
+            <i class="fa-solid fa-battery-full"></i>
+        </div>
+
+        <div id="main-content" class="main-content">
+            <div id="tare-indicator" class="tare-indicator">TARE</div>
+
+            <div id="food-selection" class="food-selection">
+                <div id="food-grid">
+                    </div>
+            </div>
+
+            <div id="nutrition-display" class="nutrition-display hidden">
+                 <div id="weight-display-nutrition" class="weight-display-nutrition">
+                     <span id="weight-value" class="weight-value">0.0</span>
+                     <span id="weight-unit" class="weight-unit">g</span>
+                 </div>
+                 <div id="nutrient-grid-container">
+                     <div id="nutrient-grid">
+                         </div>
+                 </div>
+            </div>
+        </div>
+
+        <div id="hint-bar" class="hint-bar"></div>
+
+        <div id="long-press-overlay" class="overlay">
+             <div class="progress-ring"> <svg class="progress-ring__svg" width="90" height="90"> <circle class="progress-ring__circle progress-ring__circle--background" fill="transparent" r="42" cx="45" cy="45"/> <circle id="progress-circle" class="progress-ring__circle" stroke="#007AFF" stroke-linecap="round" fill="transparent" r="42" cx="45" cy="45"/> </svg> <span id="progress-text" class="progress-ring__text"></span> </div>
+            <p id="long-press-action-text" class="mt-1 text-lg"></p>
+        </div>
+        <div id="power-off-confirm-overlay" class="overlay">
+            <p class="text-xl mb-4">确认关机?</p>
+            <div class="confirm-options"> <span id="confirm-cancel" class="option selected">取消</span> <span id="confirm-power-off" class="option">确认</span> </div>
+            <p class="text-sm mt-4 text-gray-400">旋转选择, 短按确认 (3秒后自动取消)</p>
+        </div>
+    </div>
+
+    <div class="interaction-controls">
+        <button id="btn-rotate-left" class="control-button" title="模拟向左旋转">← 旋转</button>
+        <button id="btn-rotate-right" class="control-button" title="模拟向右旋转">旋转 →</button>
+        <button id="btn-short-press" class="control-button" title="模拟短按">确认食物</button>
+        <button id="btn-long-press" class="control-button secondary" title="模拟长按旋钮">长按 (返回/关机)</button>
+        <button id="btn-return-index" class="control-button secondary" title="返回目录页面">返回目录</button>
+        <button id="btn-add-weight" class="control-button" style="background-color: #10b981;">模拟加重</button>
+        <button id="btn-reset-weight" class="control-button" style="background-color: #f87171;">模拟清零</button>
+    </div>
+
+    <script>
+        // --- State Variables ---
+        let currentWeight = 0.0;
+        let selectedFoodIndex = 0;
+        let isFoodConfirmed = false;
+        const nutrients = [ { key: 'kcal', name: '卡路里', unit: 'kcal', precision: 0 }, { key: 'p', name: '蛋白质', unit: 'g', precision: 1 }, { key: 'f', name: '脂肪', unit: 'g', precision: 1 }, { key: 'c', name: '碳水', unit: 'g', precision: 1 }, { key: 'fiber', name: '纤维', unit: 'g', precision: 1 }, { key: 'sugar', name: '糖', unit: 'g', precision: 1 }, { key: 'ca', name: '钙', unit: 'mg', precision: 0 }, { key: 'fe', name: '铁', unit: 'mg', precision: 1 }, { key: 'zn', name: '锌', unit: 'mg', precision: 1 }, { key: 'se', name: '硒', unit: 'mcg', precision: 0 }, { key: 'na', name: '钠', unit: 'mg', precision: 0 }, { key: 'k', name: '钾', unit: 'mg', precision: 0 } ];
+        // Added color property to each food item
+        const foodDatabase = [
+            { name: "苹果", icon: "fa-solid fa-apple-whole", color: "#FF6347", kcal: 52, p: 0.3, f: 0.2, c: 13.8, fiber: 2.4, sugar: 10.4, ca: 6, fe: 0.1, zn: 0.0, se: 0.1, na: 1, k: 107 },
+            { name: "胡萝卜", icon: "fa-solid fa-carrot", color: "#FFA500", kcal: 41, p: 0.9, f: 0.2, c: 10.0, fiber: 2.8, sugar: 4.7, ca: 33, fe: 0.3, zn: 0.2, se: 0.1, na: 69, k: 320 },
+            { name: "鸡胸肉", icon: "fa-solid fa-drumstick-bite", color: "#D2B48C", kcal: 165, p: 31.0, f: 3.6, c: 0.0, fiber: 0.0, sugar: 0.0, ca: 13, fe: 1.0, zn: 0.8, se: 25.5, na: 74, k: 256 },
+            { name: "米饭", icon: "fa-solid fa-bowl-rice", color: "#FFFFE0", kcal: 130, p: 2.7, f: 0.3, c: 28.2, fiber: 0.4, sugar: 0.1, ca: 10, fe: 0.8, zn: 1.1, se: 15.1, na: 1, k: 35 },
+            { name: "牛奶", icon: "fa-solid fa-cow", color: "#ADD8E6", kcal: 42, p: 3.4, f: 1.0, c: 5.0, fiber: 0.0, sugar: 5.0, ca: 125, fe: 0.1, zn: 0.4, se: 3.7, na: 44, k: 150 },
+            { name: "鸡蛋", icon: "fa-solid fa-egg", color: "#FFD700", kcal: 155, p: 13.0, f: 11.0, c: 1.1, fiber: 0.0, sugar: 1.1, ca: 50, fe: 1.2, zn: 1.1, se: 30.8, na: 124, k: 126 },
+            { name: "柠檬", icon: "fa-solid fa-lemon", color: "#FFFACD", kcal: 29, p: 1.1, f: 0.3, c: 9.3, fiber: 2.8, sugar: 2.5, ca: 26, fe: 0.6, zn: 0.1, se: 0.4, na: 2, k: 138 },
+            { name: "燕麦片", icon: "fa-solid fa-wheat-awn", color: "#F5F5DC", kcal: 389, p: 16.9, f: 6.9, c: 66.3, fiber: 10.6, sugar: 0.0, ca: 54, fe: 4.7, zn: 4.0, se: 7.5, na: 2, k: 429 },
+            { name: "杏仁", icon: "fa-solid fa-seedling", color: "#A0522D", kcal: 579, p: 21.2, f: 49.9, c: 21.6, fiber: 12.5, sugar: 4.4, ca: 269, fe: 3.7, zn: 3.1, se: 4.1, na: 1, k: 733 },
+            { name: "面包", icon: "fa-solid fa-bread-slice", color: "#DEB887", kcal: 265, p: 13.0, f: 3.3, c: 49.0, fiber: 7.0, sugar: 5.0, ca: 148, fe: 3.6, zn: 1.0, se: 19.0, na: 491, k: 260 },
+            { name: "三文鱼", icon: "fa-solid fa-fish-fins", color: "#FA8072", kcal: 208, p: 20.0, f: 13.0, c: 0.0, fiber: 0.0, sugar: 0.0, ca: 9, fe: 0.3, zn: 0.4, se: 36.5, na: 59, k: 429 },
+            { name: "奶酪", icon: "fa-solid fa-cheese", color: "#FFEC8B", kcal: 402, p: 25.0, f: 33.0, c: 1.3, fiber: 0.0, sugar: 0.5, ca: 721, fe: 0.3, zn: 3.1, se: 14.5, na: 621, k: 98 },
+        ];
+        let tareTimeout = null;
+        let longPressTimer = null; let longPressStartTime = 0; let currentLongPressDuration = 0;
+        let longPressActive = false; let longPressThresholdMet = false;
+        const SHOW_OVERLAY_DURATION = 1000; const POWER_CONFIRM_DURATION = 5000;
+        const POWER_CONFIRM_TIMEOUT_DURATION = 3000; const LONG_PRESS_COLOR_BACK = '#007AFF';
+        let isPowerConfirmActive = false; let powerConfirmSelection = 'cancel'; let powerConfirmTimeout = null;
+        const radius = 42; const circumference = radius * 2 * Math.PI;
+        let foodItemElements = [];
+        const units = ['g', 'ml', 'oz', 'lb', 'lb:oz'];
+        const unitColors = { 'g': 'unit-g', 'ml': 'unit-ml', 'oz': 'unit-oz', 'lb': 'unit-lb', 'lb:oz': 'unit-lb-oz' };
+        let currentUnitIndex = 0;
+        const G_PER_ML = 1.0; const G_PER_OZ = 28.3495; const G_PER_LB = 453.592;
+
+        // --- DOM Elements & Function Definitions (Inside 'load' event) ---
+        window.addEventListener('load', () => {
+            // --- DOM Element Selection ---
+            const mainContent = document.getElementById('main-content');
+            const statusPrompt = document.getElementById('status-prompt');
+            const foodSelection = document.getElementById('food-selection');
+            const foodGrid = document.getElementById('food-grid');
+            const nutritionDisplay = document.getElementById('nutrition-display');
+            const weightDisplayNutrition = document.getElementById('weight-display-nutrition');
+            const weightValue = document.getElementById('weight-value');
+            const weightUnit = document.getElementById('weight-unit');
+            const nutrientGridContainer = document.getElementById('nutrient-grid-container');
+            const nutrientGrid = document.getElementById('nutrient-grid');
+            const hintBar = document.getElementById('hint-bar');
+            const tareIndicator = document.getElementById('tare-indicator');
+            const longPressOverlay = document.getElementById('long-press-overlay');
+            const progressCircle = document.getElementById('progress-circle');
+            const progressText = document.getElementById('progress-text');
+            const longPressActionText = document.getElementById('long-press-action-text');
+            const powerOffConfirmOverlay = document.getElementById('power-off-confirm-overlay');
+            const confirmCancelBtn = document.getElementById('confirm-cancel');
+            const confirmPowerOffBtn = document.getElementById('confirm-power-off');
+            const btnRotateLeft = document.getElementById('btn-rotate-left');
+            const btnRotateRight = document.getElementById('btn-rotate-right');
+            const btnShortPress = document.getElementById('btn-short-press');
+            const btnLongPress = document.getElementById('btn-long-press');
+            const btnReturnIndex = document.getElementById('btn-return-index');
+            const btnAddWeight = document.getElementById('btn-add-weight');
+            const btnResetWeight = document.getElementById('btn-reset-weight');
+
+
+            // --- Function Definitions ---
+            function showTareIndicator() {
+                 if(!tareIndicator) return;
+                 tareIndicator.classList.add('visible');
+                 if (tareTimeout) { clearTimeout(tareTimeout); }
+                 tareTimeout = setTimeout(() => {
+                     if(tareIndicator) tareIndicator.classList.remove('visible');
+                     tareTimeout = null;
+                 }, 1000);
+            }
+
+            function formatWeight(weightValue) {
+                  const currentUnit = units[currentUnitIndex]; let displayWeight; let valueInGrams = weightValue; let displayUnit = 'g'; let valueToDisplay = valueInGrams; if (currentUnit === 'ml') { valueToDisplay = valueInGrams / G_PER_ML; displayUnit = 'ml'; displayWeight = valueToDisplay.toFixed(1); } else if (currentUnit === 'oz') { valueToDisplay = valueInGrams / G_PER_OZ; displayUnit = 'oz'; displayWeight = valueToDisplay.toFixed(1); } else if (currentUnit === 'lb') { valueToDisplay = valueInGrams / G_PER_LB; displayUnit = 'lb'; displayWeight = valueToDisplay.toFixed(2); } else if (currentUnit === 'lb:oz') { const totalOunces = valueInGrams / G_PER_OZ; const pounds = Math.floor(totalOunces / 16); const ounces = (totalOunces % 16); displayUnit = 'lb:oz'; displayWeight = `${pounds}:${(ounces < 0 && ounces > -0.05) ? '0.0' : ounces.toFixed(1)}`; } else { displayUnit = 'g'; displayWeight = valueToDisplay.toFixed(1); } if (Math.abs(parseFloat(displayWeight)) < 0.01 && currentUnit !== 'lb:oz') { displayWeight = (0.0).toFixed(displayWeight.includes('.') ? displayWeight.split('.')[1].length : 1); } return { value: displayWeight, unit: displayUnit };
+            }
+
+            function calculateSingleNutrient(nutrientKey, weightGrams) {
+                 if (weightGrams <= 0 || selectedFoodIndex < 0 || selectedFoodIndex >= foodDatabase.length) { return 0; }
+                 const food = foodDatabase[selectedFoodIndex];
+                 const valuePer100g = food[nutrientKey] || 0;
+                 const weightFactor = weightGrams / 100.0;
+                 const calculatedValue = valuePer100g * weightFactor;
+                 const nutrientInfo = nutrients.find(n => n.key === nutrientKey);
+                 const precision = nutrientInfo ? nutrientInfo.precision : 1;
+                 if (nutrientKey === 'kcal') { return Math.round(calculatedValue); }
+                 else { return parseFloat(calculatedValue.toFixed(precision)); }
+            }
+
+            function generateNutrientGridHTML() {
+                 if (!nutrientGrid) return '';
+                 let html = '';
+                 nutrients.forEach((nutrient) => {
+                     const value = calculateSingleNutrient(nutrient.key, currentWeight);
+                     // No 'selected' class needed for individual grid items
+                     html += `
+                         <div class="nutrient-grid-item">
+                             <span class="nutrient-grid-name">${nutrient.name}</span>
+                             <span class="nutrient-grid-value">
+                                 ${value}
+                                 <span class="nutrient-grid-unit">${nutrient.unit}</span>
+                             </span>
+                         </div>
+                     `;
+                 });
+                 nutrientGrid.innerHTML = html;
+            }
+
+
+            function updateUI() {
+                if (!mainContent || !statusPrompt || !foodSelection || !nutritionDisplay || !hintBar || !foodGrid || !weightDisplayNutrition || !nutrientGridContainer || !nutrientGrid || !btnAddWeight || !btnResetWeight) {
+                    console.error("DOM elements missing in updateUI"); return;
+                }
+
+                const isWeighing = currentWeight > 0.05;
+
+                // Toggle main display sections based on isFoodConfirmed
+                foodSelection.classList.toggle('hidden', isFoodConfirmed);
+                nutritionDisplay.classList.toggle('hidden', !isFoodConfirmed);
+                // Always center vertically
+                mainContent.classList.add('center-content');
+                mainContent.classList.remove('align-end');
+
+                let promptText = ''; let hintTextVal = ''; let shortPressAction = '';
+                let enableRotation = true;
+
+                if (isFoodConfirmed) { // Nutrition Display State
+                    const food = foodDatabase[selectedFoodIndex];
+                    promptText = `营养成分 (${food.name})`;
+
+                    // Update Primary Weight Display
+                    const formattedWeight = formatWeight(currentWeight);
+                    if (weightValue) weightValue.textContent = formattedWeight.value;
+                    if (weightUnit) weightUnit.textContent = formattedWeight.unit;
+                    if (weightUnit) {
+                        weightUnit.className = 'weight-unit'; // Reset
+                        if (unitColors[formattedWeight.unit]) { weightUnit.classList.add(unitColors[formattedWeight.unit]); }
+                    }
+
+                    // Generate and Update Nutrient Grid
+                    generateNutrientGridHTML();
+
+                    if (isWeighing) {
+                         hintTextVal = "旋转滚动查看, 短按去皮";
+                         shortPressAction = 'TARE';
+                         enableRotation = true; // Allow rotating (scrolling) nutrients
+                    } else { // Food confirmed, but weight is 0
+                        hintTextVal = "旋转切换单位, 放置食物称重";
+                        shortPressAction = 'TARE';
+                        enableRotation = true; // Allow rotating units
+                    }
+
+                } else { // Food Selection State
+                    promptText = "选择食物";
+                    foodItemElements.forEach((item, index) => {
+                        if(item) item.classList.toggle('selected', index === selectedFoodIndex);
+                    });
+                    hintTextVal = "旋转选择食物, 短按确认";
+                    shortPressAction = '确认食物';
+                    enableRotation = true; // Allow rotating food
+                }
+
+                statusPrompt.textContent = promptText;
+                hintBar.textContent = hintTextVal;
+
+                if (btnShortPress) btnShortPress.textContent = `${shortPressAction} (短按)`;
+                if (btnRotateLeft) btnRotateLeft.disabled = !enableRotation;
+                if (btnRotateRight) btnRotateRight.disabled = !enableRotation;
+                // Check simulation buttons before accessing disabled property
+                if (btnAddWeight) btnAddWeight.disabled = !isFoodConfirmed;
+                if (btnResetWeight) btnResetWeight.disabled = !isFoodConfirmed || !isWeighing;
+            }
+
+
+            function generateFoodGrid() {
+                 if (!foodGrid) return;
+                 foodGrid.innerHTML = '';
+                 foodItemElements = [];
+                 foodDatabase.forEach((food, index) => {
+                      const item = document.createElement('div');
+                      item.classList.add('food-item');
+                      const icon = document.createElement('i');
+                      icon.className = food.icon || "fa-solid fa-question-circle";
+                      // Apply the color from the database
+                      if (food.color) {
+                          icon.style.color = food.color;
+                      }
+                      item.appendChild(icon);
+                      const nameSpan = document.createElement('span');
+                      nameSpan.textContent = food.name;
+                      item.appendChild(nameSpan);
+                      item.dataset.index = index;
+                      foodGrid.appendChild(item);
+                      foodItemElements.push(item);
+                 });
+            }
+
+            function setState(newState) { if(mainContent) updateUI(); }
+            function resetScale() {
+                currentWeight = 0.0;
+                isFoodConfirmed = false;
+                selectedFoodIndex = 0;
+                // selectedNutrientIndex = 0; // Not needed for highlight
+                currentUnitIndex = 0;
+                if(nutrientGridContainer) nutrientGridContainer.scrollTop = 0;
+                if(mainContent) updateUI();
+            }
+
+            function simulateAddWeight() { if (isFoodConfirmed) { currentWeight += Math.random() * 200 + 50; updateUI(); } }
+            function simulateResetWeight() { if (isFoodConfirmed) { currentWeight = 0.0; updateUI(); } }
+
+            function handleShortPress() {
+                 if (isPowerConfirmActive) { clearTimeout(powerConfirmTimeout); if (powerConfirmSelection === 'power-off') { simulatePowerOff(); } else { hidePowerConfirm(); } return; }
+
+                 if (isFoodConfirmed) { // Currently showing nutrition
+                     showTareIndicator(); currentWeight = 0.0; updateUI();
+                 } else { // Currently selecting food
+                     console.log(`Food selected: ${foodDatabase[selectedFoodIndex].name}`);
+                     isFoodConfirmed = true; currentWeight = 0.0;
+                     currentUnitIndex = 0; // Reset to grams when confirming food
+                     // selectedNutrientIndex = 0; // Reset if needed
+                     updateUI();
+                 }
+            }
+            // Handle Rotation: Switch Food, Switch Unit, or Scroll Nutrients
+            function handleRotate(direction) {
+                 if (isPowerConfirmActive) { powerConfirmSelection = (powerConfirmSelection === 'cancel') ? 'power-off' : 'cancel'; updatePowerConfirmSelection(); resetPowerConfirmTimeout(); return; }
+
+                 if (isFoodConfirmed) {
+                     const isWeighing = currentWeight > 0.05;
+                     if (isWeighing) { // Scroll nutrient list
+                         if (nutrientGridContainer) {
+                             const scrollAmount = nutrientGridContainer.clientHeight * 0.6;
+                             nutrientGridContainer.scrollBy({ top: direction * scrollAmount, behavior: 'smooth' });
+                         }
+                     } else { // Rotate units
+                         currentUnitIndex = (currentUnitIndex + direction + units.length) % units.length;
+                         updateUI();
+                     }
+                 } else { // Rotate food selection
+                    selectedFoodIndex = (selectedFoodIndex + direction + foodDatabase.length) % foodDatabase.length;
+                    updateUI();
+                 }
+            }
+
+            // --- Power Off & Long Press Logic ---
+            function showPowerConfirm() { isPowerConfirmActive = true; powerConfirmSelection = 'cancel'; updatePowerConfirmSelection(); if(powerOffConfirmOverlay) powerOffConfirmOverlay.classList.add('visible'); if(hintBar) hintBar.textContent = "旋转选择, 短按确认"; resetPowerConfirmTimeout(); }
+            function hidePowerConfirm() { if (powerConfirmTimeout) clearTimeout(powerConfirmTimeout); isPowerConfirmActive = false; if(powerOffConfirmOverlay) powerOffConfirmOverlay.classList.remove('visible'); updateUI(); }
+            function updatePowerConfirmSelection() { if(confirmCancelBtn && confirmPowerOffBtn){ confirmCancelBtn.classList.toggle('selected', powerConfirmSelection === 'cancel'); confirmPowerOffBtn.classList.toggle('selected', powerConfirmSelection === 'power-off');} }
+            function resetPowerConfirmTimeout() { if (powerConfirmTimeout) clearTimeout(powerConfirmTimeout); powerConfirmTimeout = setTimeout(() => { console.log("Power confirm timed out."); hidePowerConfirm(); }, POWER_CONFIRM_TIMEOUT_DURATION); }
+            function simulatePowerOff() { console.log("Simulating Power Off..."); if(powerOffConfirmOverlay) powerOffConfirmOverlay.innerHTML = '<p class="text-2xl">关机...</p>'; disableAllButtons(); }
+            function disableAllButtons() { [btnRotateLeft, btnRotateRight, btnShortPress, btnLongPress, btnReturnIndex, btnAddWeight, btnResetWeight].forEach(btn => {if(btn) btn.disabled = true;}); }
+            function setProgress(percent) { if(!progressCircle) return; const offset = circumference - percent / 100 * circumference; progressCircle.style.strokeDashoffset = offset; }
+            function startLongPress() { if (longPressActive || isPowerConfirmActive || !longPressOverlay) return; longPressActive = true; longPressThresholdMet = false; longPressStartTime = Date.now(); currentLongPressDuration = 0; longPressOverlay.classList.remove('visible'); setProgress(0); const updateProgress = () => { if (!longPressActive) return; const elapsedTime = Date.now() - longPressStartTime; currentLongPressDuration = elapsedTime; if (!longPressThresholdMet && elapsedTime >= SHOW_OVERLAY_DURATION) { longPressThresholdMet = true; if(progressCircle) progressCircle.setAttribute('stroke', LONG_PRESS_COLOR_BACK); if(longPressActionText) longPressActionText.innerHTML = `此时<span class="blink-text">松开按钮</span>，<strong class="font-bold">返回上一级菜单</strong>`; if(longPressOverlay) longPressOverlay.classList.add('visible'); } if (longPressThresholdMet) { const progressPercent = Math.min(100, (elapsedTime / POWER_CONFIRM_DURATION) * 100); setProgress(progressPercent); const remainingSeconds = Math.ceil((POWER_CONFIRM_DURATION - elapsedTime) / 1000); if(progressText) progressText.textContent = remainingSeconds > 0 ? remainingSeconds : '0'; if (elapsedTime >= POWER_CONFIRM_DURATION) { cancelAnimationFrame(longPressTimer); longPressTimer = null; longPressActive = false; if(longPressOverlay) longPressOverlay.classList.remove('visible'); showPowerConfirm(); return; } } if (longPressActive) { longPressTimer = requestAnimationFrame(updateProgress); } }; longPressTimer = requestAnimationFrame(updateProgress); }
+            function cancelLongPress() { if (!longPressActive) return; longPressActive = false; if (longPressTimer) { cancelAnimationFrame(longPressTimer); longPressTimer = null; } if (longPressThresholdMet && longPressOverlay) { longPressOverlay.classList.remove('visible'); } if (currentLongPressDuration >= SHOW_OVERLAY_DURATION && currentLongPressDuration < POWER_CONFIRM_DURATION) { console.log("Executing Back Action (Using history)..."); window.history.back(); } else if (currentLongPressDuration < SHOW_OVERLAY_DURATION) { console.log("Long press cancelled (too short)."); } currentLongPressDuration = 0; longPressThresholdMet = false; }
+
+
+            // --- Event Listeners ---
+            if(btnRotateLeft) btnRotateLeft.addEventListener('click', () => handleRotate(-1));
+            if(btnRotateRight) btnRotateRight.addEventListener('click', () => handleRotate(1));
+            if(btnShortPress) btnShortPress.addEventListener('click', handleShortPress);
+            if(btnLongPress) {
+                btnLongPress.addEventListener('mousedown', startLongPress);
+                btnLongPress.addEventListener('mouseup', cancelLongPress);
+                btnLongPress.addEventListener('mouseleave', cancelLongPress);
+            }
+            if(btnReturnIndex) btnReturnIndex.addEventListener('click', () => { window.location.href = 'index.html'; });
+            if(btnAddWeight) btnAddWeight.addEventListener('click', simulateAddWeight);
+            if(btnResetWeight) btnResetWeight.addEventListener('click', resetScale);
+
+
+            // --- Initial Setup ---
+            generateFoodGrid();
+            updateUI(); // Initial UI setup
+            if(progressCircle) {
+                progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+                progressCircle.style.strokeDashoffset = circumference;
+            } else {
+                console.error("Progress circle element not found during initialization.");
+            }
+        });
+
+    </script>
+
+</body>
+</html>
