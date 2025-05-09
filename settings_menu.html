@@ -79,6 +79,57 @@
             color: #ffffff;
         }
 
+        /* Brightness Status Bar Styles */
+        .brightness-bar-container {
+            display: flex;
+            align-items: center;
+            margin-left: auto; /* Pushes the bar to the right */
+            width: 150px; /* Adjust width as needed - Increased from 100px */
+            height: 12px; /* Adjust height as needed */
+            background-color: #333; /* Track color */
+            border-radius: 6px;
+            padding: 2px; /* Optional padding for the track */
+            box-sizing: border-box;
+        }
+        .brightness-bar-fill {
+            height: 100%;
+            background-color: #facc15; /* Fill color (bright yellow) */
+            border-radius: 4px; /* Slightly smaller radius than container */
+            transition: width 0.2s ease-in-out;
+            width: 0%; /* Initial width */
+        }
+
+        /* Toggle Switch Styles */
+        .toggle-switch {
+            width: 50px; /* Width of the toggle switch */
+            height: 26px; /* Height of the toggle switch */
+            background-color: #555; /* Background when off */
+            border-radius: 13px; /* Fully rounded ends */
+            padding: 3px;
+            box-sizing: border-box;
+            cursor: default;
+            transition: background-color 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            margin-left: auto; /* Pushes the switch to the right */
+            position: relative; /* For knob positioning */
+        }
+        .toggle-switch.on {
+            background-color: #facc15; /* Background when on (统一为黄色) */
+        }
+        .toggle-knob {
+            width: 20px; /* Diameter of the knob */
+            height: 20px; /* Diameter of the knob */
+            background-color: white;
+            border-radius: 50%; /* Circular knob */
+            transition: transform 0.2s ease-in-out;
+            position: absolute;
+            left: 3px; /* Initial position (off) */
+        }
+        .toggle-switch.on .toggle-knob {
+            transform: translateX(24px); /* Move knob to the right when on (width - knob_width - padding*2) approx */
+        }
+
         /* Hint Bar - Keep absolutely positioned */
         .hint-bar {
             text-align: center;
@@ -133,11 +184,17 @@
 
         <div class="main-content">
             <ul class="settings-list">
-                <li class="settings-item" data-target="settings_brightness.html">
+                <li class="settings-item" id="brightness-control-item">
                     <i class="fa-solid fa-sun"></i> <span>亮度调节</span>
+                    <div class="brightness-bar-container">
+                        <div id="brightness-status-bar-fill" class="brightness-bar-fill"></div>
+                    </div>
                 </li>
-                <li class="settings-item" data-target="settings_sound.html">
+                <li class="settings-item" id="sound-control-item">
                     <i class="fa-solid fa-volume-high"></i> <span>声音设置</span>
+                    <div class="toggle-switch" id="sound-toggle">
+                        <div class="toggle-knob"></div>
+                    </div>
                 </li>
                 <li class="settings-item" data-target="settings_factory_reset.html">
                      <i class="fa-solid fa-arrows-rotate"></i> <span>恢复出厂设置</span>
@@ -204,7 +261,34 @@
             let isPowerConfirmActive = false; let powerConfirmSelection = 'cancel'; let powerConfirmTimeout = null;
             const radius = 42; const circumference = radius * 2 * Math.PI;
 
+            // --- Brightness Control State ---
+            let currentBrightnessLevel = 3; // 1=20%, 2=40%, 3=60%, 4=80%, 5=100%. Default to 3 (60%).
+            const TOTAL_BRIGHTNESS_LEVELS = 5;
+            const brightnessBarFill = document.getElementById('brightness-status-bar-fill');
+
+            // --- Sound Control State ---
+            let isSoundOn = true; // Default to sound ON
+            const soundToggleElement = document.getElementById('sound-toggle');
+
+
             // --- Function Definitions ---
+            function updateBrightnessVisual() {
+                if (!brightnessBarFill) return;
+                const percentage = currentBrightnessLevel * (100 / TOTAL_BRIGHTNESS_LEVELS);
+                brightnessBarFill.style.width = `${percentage}%`;
+
+                // Optional: Update body brightness or a pseudo-element for visual feedback
+                // Example: document.body.style.filter = `brightness(${0.1 + (percentage / 100 * 0.9)})`;
+                console.log(`Brightness set to level: ${currentBrightnessLevel} (${percentage}%)`);
+            }
+
+            function updateSoundToggleVisual() {
+                if (!soundToggleElement) return;
+                soundToggleElement.classList.toggle('on', isSoundOn);
+                console.log(`Sound is now: ${isSoundOn ? 'ON' : 'OFF'}`);
+            }
+
+
             function updateSelection() {
                 settingsItems.forEach((item, index) => {
                     if(item) item.classList.toggle('selected', index === selectedIndex);
@@ -226,16 +310,49 @@
                  if (isPowerConfirmActive) { clearTimeout(powerConfirmTimeout); if (powerConfirmSelection === 'power-off') { simulatePowerOff(); } else { hidePowerConfirm(); } return; }
 
                  const selectedItemElement = settingsItems[selectedIndex];
-                 const targetPage = selectedItemElement?.getAttribute('data-target');
-                 if (targetPage) {
-                     selectedItemElement.style.transition = 'transform 0.1s ease';
-                     selectedItemElement.style.transform = 'scale(0.98)';
-                     setTimeout(() => {
-                         selectedItemElement.style.transition = 'transform 0.2s ease-out, background-color 0.2s ease, border-color 0.2s ease';
-                         selectedItemElement.style.transform = 'scale(1)';
-                         console.log(`Navigating to: ${targetPage}`);
-                         window.location.href = targetPage;
-                     }, 100);
+                 if (!selectedItemElement) return;
+
+                 if (selectedItemElement.id === 'brightness-control-item') {
+                     currentBrightnessLevel++;
+                     if (currentBrightnessLevel > TOTAL_BRIGHTNESS_LEVELS) {
+                         currentBrightnessLevel = 1; // Wrap around to the lowest level (20%)
+                     }
+                     updateBrightnessVisual();
+                     // Optionally provide feedback in hint bar or status prompt
+                     if(statusPrompt) {
+                        const brightnessPercentage = currentBrightnessLevel * (100 / TOTAL_BRIGHTNESS_LEVELS);
+                        statusPrompt.textContent = `亮度: ${brightnessPercentage}%`;
+                        setTimeout(() => {
+                            if (statusPrompt.textContent === `亮度: ${brightnessPercentage}%`) {
+                                statusPrompt.textContent = "设置";
+                            }
+                        }, 1500);
+                     }
+                 } else if (selectedItemElement.id === 'sound-control-item') {
+                    isSoundOn = !isSoundOn; // Toggle the sound state
+                    updateSoundToggleVisual();
+                    if(statusPrompt) {
+                        const soundStatusText = `声音: ${isSoundOn ? '开' : '关'}`;
+                        statusPrompt.textContent = soundStatusText;
+                        setTimeout(() => {
+                            if (statusPrompt.textContent === soundStatusText) {
+                                statusPrompt.textContent = "设置";
+                            }
+                        }, 1500);
+                    }
+                 }
+                 else {
+                     const targetPage = selectedItemElement.getAttribute('data-target');
+                     if (targetPage) {
+                         selectedItemElement.style.transition = 'transform 0.1s ease';
+                         selectedItemElement.style.transform = 'scale(0.98)';
+                         setTimeout(() => {
+                             selectedItemElement.style.transition = 'transform 0.2s ease-out, background-color 0.2s ease, border-color 0.2s ease';
+                             selectedItemElement.style.transform = 'scale(1)';
+                             console.log(`Navigating to: ${targetPage}`);
+                             window.location.href = targetPage;
+                         }, 100);
+                     }
                  }
             }
 
@@ -265,6 +382,8 @@
 
             // --- Initial Setup ---
             updateSelection(); // Initial highlight
+            updateBrightnessVisual(); // Initialize brightness display
+            updateSoundToggleVisual(); // Initialize sound toggle display
             if(progressCircle) {
                 progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
                 progressCircle.style.strokeDashoffset = circumference;
