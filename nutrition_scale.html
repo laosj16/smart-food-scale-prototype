@@ -106,17 +106,55 @@
         .weight-unit { font-size: 22px; font-weight: 500; color: #a0a0a0; margin-left: 6px; transition: color 0.3s ease; }
         .unit-g { color: #60a5fa; } .unit-ml { color: #34d399; } .unit-oz { color: #fbbf24; } .unit-lb { color: #f87171; } .unit-lb-oz { color: #c084fc; }
 
-        /* Nutrient Grid Container - Hide scrollbar */
-        #nutrient-grid-container { flex-grow: 1; width: 100%; overflow-y: auto; padding: 5px 0; scrollbar-width: none; -ms-overflow-style: none; }
-        #nutrient-grid-container::-webkit-scrollbar { display: none; }
-        /* Nutrient Grid */
-        #nutrient-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
-        /* Nutrient Grid Item */
-        .nutrient-grid-item { background-color: rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 8px; text-align: center; }
-        .nutrient-grid-name { font-size: 13px; color: #b0b0b0; margin-bottom: 3px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .nutrient-grid-value { font-size: 18px; color: #ffffff; font-weight: 600; }
-        .nutrient-grid-unit { font-size: 12px; color: #a0a0a0; margin-left: 3px; }
+        /* Nutrient Grid Container - Hide scrollbar (Now nutrient-details-container) */
+        #nutrient-details-container { flex-grow: 1; width: 100%; overflow-y: auto; padding: 5px 0; scrollbar-width: none; -ms-overflow-style: none; }
+        #nutrient-details-container::-webkit-scrollbar { display: none; }
 
+        /* Kcal Display */
+        .kcal-display-custom {
+            text-align: center;
+            padding: 10px 0;
+            margin-bottom: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+        .kcal-display-custom .name {
+            font-size: 14px; color: #b0b0b0; display: block; margin-bottom: 2px;
+        }
+        .kcal-display-custom .value {
+            font-size: 24px; color: #ffffff; font-weight: 700;
+        }
+        .kcal-display-custom .unit {
+            font-size: 14px; color: #a0a0a0; margin-left: 4px;
+        }
+
+        /* Macronutrients Grid (P, F, C) */
+        .macro-nutrients-grid-custom {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .macro-nutrients-grid-custom .nutrient-item { 
+            background-color: rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 8px; text-align: center;
+        }
+        .macro-nutrients-grid-custom .nutrient-name { font-size: 13px; color: #b0b0b0; margin-bottom: 3px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .macro-nutrients-grid-custom .nutrient-value { font-size: 18px; color: #ffffff; font-weight: 600; }
+        .macro-nutrients-grid-custom .nutrient-unit { font-size: 12px; color: #a0a0a0; margin-left: 3px; }
+
+        /* Other Nutrients Grid */
+        .other-nutrients-grid-custom {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 columns for more items */
+            gap: 6px; /* Smaller gap for more items */
+            margin-top: 20px; /* Added margin-top to push it down, effectively to the "second page" */
+        }
+        .other-nutrients-grid-custom .nutrient-item {
+            background-color: rgba(255, 255, 255, 0.06); border-radius: 6px; padding: 6px; text-align: center;
+        }
+        .other-nutrients-grid-custom .nutrient-name { font-size: 11px; color: #b0b0b0; margin-bottom: 2px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .other-nutrients-grid-custom .nutrient-value { font-size: 15px; color: #ffffff; font-weight: 500; }
+        .other-nutrients-grid-custom .nutrient-unit { font-size: 10px; color: #a0a0a0; margin-left: 2px; }
 
         /* TARE Indicator */
         .tare-indicator { position: absolute; top: 50%; transform: translateY(-50%); left: 15px; background-color: #007AFF; color: white; padding: 3px 8px; border-radius: 5px; font-size: 14px; font-weight: bold; opacity: 0; transition: opacity 0.2s ease-out; z-index: 5; white-space: nowrap; }
@@ -176,9 +214,16 @@
                      <span id="weight-value" class="weight-value">0.0</span>
                      <span id="weight-unit" class="weight-unit">g</span>
                  </div>
-                 <div id="nutrient-grid-container">
-                     <div id="nutrient-grid">
-                         </div>
+                 <div id="nutrient-details-container">
+                    <div id="kcal-display" class="kcal-display-custom">
+                        <!-- Kcal will be populated here by JS -->
+                    </div>
+                    <div id="macro-nutrients-grid" class="macro-nutrients-grid-custom">
+                        <!-- Protein, Fat, Carbs will be populated here by JS -->
+                    </div>
+                    <div id="other-nutrients-grid" class="other-nutrients-grid-custom">
+                        <!-- Other nutrients will be populated here by JS -->
+                    </div>
                  </div>
             </div>
         </div>
@@ -211,21 +256,50 @@
         let currentWeight = 0.0;
         let selectedFoodIndex = 0;
         let isFoodConfirmed = false;
-        const nutrients = [ { key: 'kcal', name: '卡路里', unit: 'kcal', precision: 0 }, { key: 'p', name: '蛋白质', unit: 'g', precision: 1 }, { key: 'f', name: '脂肪', unit: 'g', precision: 1 }, { key: 'c', name: '碳水', unit: 'g', precision: 1 }, { key: 'fiber', name: '纤维', unit: 'g', precision: 1 }, { key: 'sugar', name: '糖', unit: 'g', precision: 1 }, { key: 'ca', name: '钙', unit: 'mg', precision: 0 }, { key: 'fe', name: '铁', unit: 'mg', precision: 1 }, { key: 'zn', name: '锌', unit: 'mg', precision: 1 }, { key: 'se', name: '硒', unit: 'mcg', precision: 0 }, { key: 'na', name: '钠', unit: 'mg', precision: 0 }, { key: 'k', name: '钾', unit: 'mg', precision: 0 } ];
-        // Added color property to each food item
+        const nutrients = [
+            { key: 'kcal', name: '卡路里', unit: 'kcal', precision: 0 },
+            { key: 'p', name: '蛋白质', unit: 'g', precision: 1 },
+            { key: 'f', name: '脂肪', unit: 'g', precision: 1 },
+            { key: 'c', name: '碳水', unit: 'g', precision: 1 },
+            { key: 'energy', name: '能量', unit: 'kJ', precision: 0 },
+            { key: 'fiber', name: '纤维', unit: 'g', precision: 1 },
+            { key: 'cholesterol', name: '胆固醇', unit: 'mg', precision: 0 },
+            { key: 'ca', name: '钙', unit: 'mg', precision: 0 },
+            { key: 'vitA', name: '维生素A', unit: 'µg', precision: 0 },
+            { key: 'vitB1', name: '维生素B1', unit: 'mg', precision: 2 },
+            { key: 'vitB2', name: '维生素B2', unit: 'mg', precision: 2 },
+            { key: 'vitB6', name: '维生素B6', unit: 'mg', precision: 2 },
+            { key: 'vitB12', name: '维生素B12', unit: 'µg', precision: 1 },
+            { key: 'vitC', name: '维生素C', unit: 'mg', precision: 0 },
+            { key: 'vitD', name: '维生素D', unit: 'µg', precision: 0 },
+            { key: 'vitE', name: '维生素E', unit: 'mg', precision: 1 },
+            { key: 'niacin', name: '烟酸', unit: 'mg', precision: 1 },
+            { key: 'phos', name: '磷', unit: 'mg', precision: 0 },
+            { key: 'k', name: '钾', unit: 'mg', precision: 0 },
+            { key: 'na', name: '钠', unit: 'mg', precision: 0 },
+            { key: 'mg', name: '镁', unit: 'mg', precision: 0 },
+            { key: 'fe', name: '铁', unit: 'mg', precision: 1 },
+            { key: 'zn', name: '锌', unit: 'mg', precision: 1 },
+            { key: 'se', name: '硒', unit: 'mcg', precision: 0 },
+            { key: 'cu', name: '铜', unit: 'mg', precision: 2 },
+            { key: 'mn', name: '锰', unit: 'mg', precision: 2 }
+        ];
+        // Added color property and new nutrient fields to each food item
+        // IMPORTANT: The values for new nutrients (cholesterol, vitamins, phos, mg, cu, mn) are PLACEHOLDERS for demonstration.
+        // Replace them with accurate nutritional data for real-world use.
         const foodDatabase = [
-            { name: "苹果", icon: "fa-solid fa-apple-whole", color: "#FF6347", kcal: 52, p: 0.3, f: 0.2, c: 13.8, fiber: 2.4, sugar: 10.4, ca: 6, fe: 0.1, zn: 0.0, se: 0.1, na: 1, k: 107 },
-            { name: "胡萝卜", icon: "fa-solid fa-carrot", color: "#FFA500", kcal: 41, p: 0.9, f: 0.2, c: 10.0, fiber: 2.8, sugar: 4.7, ca: 33, fe: 0.3, zn: 0.2, se: 0.1, na: 69, k: 320 },
-            { name: "鸡胸肉", icon: "fa-solid fa-drumstick-bite", color: "#D2B48C", kcal: 165, p: 31.0, f: 3.6, c: 0.0, fiber: 0.0, sugar: 0.0, ca: 13, fe: 1.0, zn: 0.8, se: 25.5, na: 74, k: 256 },
-            { name: "米饭", icon: "fa-solid fa-bowl-rice", color: "#FFFFE0", kcal: 130, p: 2.7, f: 0.3, c: 28.2, fiber: 0.4, sugar: 0.1, ca: 10, fe: 0.8, zn: 1.1, se: 15.1, na: 1, k: 35 },
-            { name: "牛奶", icon: "fa-solid fa-cow", color: "#ADD8E6", kcal: 42, p: 3.4, f: 1.0, c: 5.0, fiber: 0.0, sugar: 5.0, ca: 125, fe: 0.1, zn: 0.4, se: 3.7, na: 44, k: 150 },
-            { name: "鸡蛋", icon: "fa-solid fa-egg", color: "#FFD700", kcal: 155, p: 13.0, f: 11.0, c: 1.1, fiber: 0.0, sugar: 1.1, ca: 50, fe: 1.2, zn: 1.1, se: 30.8, na: 124, k: 126 },
-            { name: "柠檬", icon: "fa-solid fa-lemon", color: "#FFFACD", kcal: 29, p: 1.1, f: 0.3, c: 9.3, fiber: 2.8, sugar: 2.5, ca: 26, fe: 0.6, zn: 0.1, se: 0.4, na: 2, k: 138 },
-            { name: "燕麦片", icon: "fa-solid fa-wheat-awn", color: "#F5F5DC", kcal: 389, p: 16.9, f: 6.9, c: 66.3, fiber: 10.6, sugar: 0.0, ca: 54, fe: 4.7, zn: 4.0, se: 7.5, na: 2, k: 429 },
-            { name: "杏仁", icon: "fa-solid fa-seedling", color: "#A0522D", kcal: 579, p: 21.2, f: 49.9, c: 21.6, fiber: 12.5, sugar: 4.4, ca: 269, fe: 3.7, zn: 3.1, se: 4.1, na: 1, k: 733 },
-            { name: "面包", icon: "fa-solid fa-bread-slice", color: "#DEB887", kcal: 265, p: 13.0, f: 3.3, c: 49.0, fiber: 7.0, sugar: 5.0, ca: 148, fe: 3.6, zn: 1.0, se: 19.0, na: 491, k: 260 },
-            { name: "三文鱼", icon: "fa-solid fa-fish-fins", color: "#FA8072", kcal: 208, p: 20.0, f: 13.0, c: 0.0, fiber: 0.0, sugar: 0.0, ca: 9, fe: 0.3, zn: 0.4, se: 36.5, na: 59, k: 429 },
-            { name: "奶酪", icon: "fa-solid fa-cheese", color: "#FFEC8B", kcal: 402, p: 25.0, f: 33.0, c: 1.3, fiber: 0.0, sugar: 0.5, ca: 721, fe: 0.3, zn: 3.1, se: 14.5, na: 621, k: 98 },
+            { name: "苹果", icon: "fa-solid fa-apple-whole", color: "#FF6347", kcal: 52, p: 0.3, f: 0.2, c: 13.8, fiber: 2.4, ca: 6, fe: 0.1, zn: 0.0, se: 0.1, na: 1, k: 107, energy: Math.round(52 * 4.184), cholesterol: 0, vitA: 54, vitB1: 0.02, vitB2: 0.03, vitB6: 0.04, vitB12: 0, vitC: 4.6, vitD: 0, vitE: 0.18, niacin: 0.09, phos: 11, mg: 5, cu: 0.03, mn: 0.04 },
+            { name: "胡萝卜", icon: "fa-solid fa-carrot", color: "#FFA500", kcal: 41, p: 0.9, f: 0.2, c: 10.0, fiber: 2.8, ca: 33, fe: 0.3, zn: 0.2, se: 0.1, na: 69, k: 320, energy: Math.round(41 * 4.184), cholesterol: 0, vitA: 835, vitB1: 0.07, vitB2: 0.06, vitB6: 0.14, vitB12: 0, vitC: 5.9, vitD: 0, vitE: 0.66, niacin: 0.98, phos: 35, mg: 12, cu: 0.04, mn: 0.14 },
+            { name: "鸡胸肉", icon: "fa-solid fa-drumstick-bite", color: "#D2B48C", kcal: 165, p: 31.0, f: 3.6, c: 0.0, fiber: 0.0, ca: 13, fe: 1.0, zn: 0.8, se: 25.5, na: 74, k: 256, energy: Math.round(165 * 4.184), cholesterol: 85, vitA: 0, vitB1: 0.07, vitB2: 0.09, vitB6: 0.6, vitB12: 0.4, vitC: 0, vitD: 0.1, vitE: 0.13, niacin: 11.4, phos: 228, mg: 29, cu: 0.05, mn: 0.02 },
+            { name: "米饭", icon: "fa-solid fa-bowl-rice", color: "#FFFFE0", kcal: 130, p: 2.7, f: 0.3, c: 28.2, fiber: 0.4, ca: 10, fe: 0.8, zn: 1.1, se: 15.1, na: 1, k: 35, energy: Math.round(130 * 4.184), cholesterol: 0, vitA: 0, vitB1: 0.07, vitB2: 0.01, vitB6: 0.16, vitB12: 0, vitC: 0, vitD: 0, vitE: 0.11, niacin: 1.6, phos: 35, mg: 12, cu: 0.07, mn: 0.38 },
+            { name: "牛奶", icon: "fa-solid fa-cow", color: "#ADD8E6", kcal: 42, p: 3.4, f: 1.0, c: 5.0, fiber: 0.0, ca: 125, fe: 0.1, zn: 0.4, se: 3.7, na: 44, k: 150, energy: Math.round(42 * 4.184), cholesterol: 5, vitA: 40, vitB1: 0.04, vitB2: 0.17, vitB6: 0.04, vitB12: 0.45, vitC: 0, vitD: 1.2, vitE: 0.07, niacin: 0.1, phos: 95, mg: 12, cu: 0.01, mn: 0.003 },
+            { name: "鸡蛋", icon: "fa-solid fa-egg", color: "#FFD700", kcal: 155, p: 13.0, f: 11.0, c: 1.1, fiber: 0.0, ca: 50, fe: 1.2, zn: 1.1, se: 30.8, na: 124, k: 126, energy: Math.round(155 * 4.184), cholesterol: 373, vitA: 149, vitB1: 0.03, vitB2: 0.5, vitB6: 0.12, vitB12: 1.1, vitC: 0, vitD: 2.2, vitE: 1.03, niacin: 0.06, phos: 198, mg: 10, cu: 0.07, mn: 0.03 },
+            { name: "柠檬", icon: "fa-solid fa-lemon", color: "#FFFACD", kcal: 29, p: 1.1, f: 0.3, c: 9.3, fiber: 2.8, ca: 26, fe: 0.6, zn: 0.1, se: 0.4, na: 2, k: 138, energy: Math.round(29 * 4.184), cholesterol: 0, vitA: 1, vitB1: 0.04, vitB2: 0.02, vitB6: 0.08, vitB12: 0, vitC: 53, vitD: 0, vitE: 0.15, niacin: 0.1, phos: 16, mg: 8, cu: 0.04, mn: 0.03 },
+            { name: "燕麦片", icon: "fa-solid fa-wheat-awn", color: "#F5F5DC", kcal: 389, p: 16.9, f: 6.9, c: 66.3, fiber: 10.6, ca: 54, fe: 4.7, zn: 4.0, se: 7.5, na: 2, k: 429, energy: Math.round(389 * 4.184), cholesterol: 0, vitA: 0, vitB1: 0.76, vitB2: 0.14, vitB6: 0.12, vitB12: 0, vitC: 0, vitD: 0, vitE: 0.63, niacin: 0.96, phos: 523, mg: 177, cu: 0.63, mn: 4.92 },
+            { name: "杏仁", icon: "fa-solid fa-seedling", color: "#A0522D", kcal: 579, p: 21.2, f: 49.9, c: 21.6, fiber: 12.5, ca: 269, fe: 3.7, zn: 3.1, se: 4.1, na: 1, k: 733, energy: Math.round(579 * 4.184), cholesterol: 0, vitA: 0, vitB1: 0.21, vitB2: 1.14, vitB6: 0.14, vitB12: 0, vitC: 0, vitD: 0, vitE: 25.63, niacin: 3.6, phos: 481, mg: 270, cu: 1.03, mn: 2.18 },
+            { name: "面包", icon: "fa-solid fa-bread-slice", color: "#DEB887", kcal: 265, p: 13.0, f: 3.3, c: 49.0, fiber: 7.0, ca: 148, fe: 3.6, zn: 1.0, se: 19.0, na: 491, k: 260, energy: Math.round(265 * 4.184), cholesterol: 0, vitA: 0, vitB1: 0.45, vitB2: 0.35, vitB6: 0.08, vitB12: 0, vitC: 0, vitD: 0, vitE: 0.2, niacin: 5.0, phos: 150, mg: 40, cu: 0.15, mn: 0.6 },
+            { name: "三文鱼", icon: "fa-solid fa-fish-fins", color: "#FA8072", kcal: 208, p: 20.0, f: 13.0, c: 0.0, fiber: 0.0, ca: 9, fe: 0.3, zn: 0.4, se: 36.5, na: 59, k: 429, energy: Math.round(208 * 4.184), cholesterol: 55, vitA: 15, vitB1: 0.2, vitB2: 0.15, vitB6: 0.65, vitB12: 3.0, vitC: 0, vitD: 10.0, vitE: 1.3, niacin: 8.0, phos: 240, mg: 27, cu: 0.05, mn: 0.02 },
+            { name: "奶酪", icon: "fa-solid fa-cheese", color: "#FFEC8B", kcal: 402, p: 25.0, f: 33.0, c: 1.3, fiber: 0.0, ca: 721, fe: 0.3, zn: 3.1, se: 14.5, na: 621, k: 98, energy: Math.round(402 * 4.184), cholesterol: 105, vitA: 290, vitB1: 0.03, vitB2: 0.38, vitB6: 0.07, vitB12: 1.7, vitC: 0, vitD: 0.6, vitE: 0.2, niacin: 0.1, phos: 512, mg: 28, cu: 0.03, mn: 0.01 },
         ];
         let tareTimeout = null;
         let longPressTimer = null; let longPressStartTime = 0; let currentLongPressDuration = 0;
@@ -251,8 +325,9 @@
             const weightDisplayNutrition = document.getElementById('weight-display-nutrition');
             const weightValue = document.getElementById('weight-value');
             const weightUnit = document.getElementById('weight-unit');
-            const nutrientGridContainer = document.getElementById('nutrient-grid-container');
-            const nutrientGrid = document.getElementById('nutrient-grid');
+            // const nutrientGridContainer = document.getElementById('nutrient-grid-container'); // Replaced
+            // const nutrientGrid = document.getElementById('nutrient-grid'); // Replaced
+            const nutrientDetailsContainer = document.getElementById('nutrient-details-container'); // New container
             const hintBar = document.getElementById('hint-bar');
             const tareIndicator = document.getElementById('tare-indicator');
             const longPressOverlay = document.getElementById('long-press-overlay');
@@ -294,32 +369,61 @@
                  const calculatedValue = valuePer100g * weightFactor;
                  const nutrientInfo = nutrients.find(n => n.key === nutrientKey);
                  const precision = nutrientInfo ? nutrientInfo.precision : 1;
-                 if (nutrientKey === 'kcal') { return Math.round(calculatedValue); }
+                 // For kcal and energy, round to whole number, others use precision.
+                 if (nutrientKey === 'kcal' || nutrientKey === 'energy') { return Math.round(calculatedValue); }
                  else { return parseFloat(calculatedValue.toFixed(precision)); }
             }
 
-            function generateNutrientGridHTML() {
-                 if (!nutrientGrid) return '';
-                 let html = '';
-                 nutrients.forEach((nutrient) => {
-                     const value = calculateSingleNutrient(nutrient.key, currentWeight);
-                     // No 'selected' class needed for individual grid items
-                     html += `
-                         <div class="nutrient-grid-item">
-                             <span class="nutrient-grid-name">${nutrient.name}</span>
-                             <span class="nutrient-grid-value">
-                                 ${value}
-                                 <span class="nutrient-grid-unit">${nutrient.unit}</span>
-                             </span>
-                         </div>
-                     `;
-                 });
-                 nutrientGrid.innerHTML = html;
+            function populateNutrientDisplays() {
+                const kcalDisplayEl = document.getElementById('kcal-display');
+                const macroNutrientsGridEl = document.getElementById('macro-nutrients-grid');
+                const otherNutrientsGridEl = document.getElementById('other-nutrients-grid');
+
+                if (!kcalDisplayEl || !macroNutrientsGridEl || !otherNutrientsGridEl) {
+                    console.error("Nutrient display elements not found in populateNutrientDisplays");
+                    return;
+                }
+
+                let kcalHTML = '';
+                let macroHTML = '';
+                let otherHTML = '';
+
+                nutrients.forEach((nutrient) => {
+                    const value = calculateSingleNutrient(nutrient.key, currentWeight);
+                    const commonNutrientHTML = `
+                        <div class="nutrient-item">
+                            <span class="nutrient-name">${nutrient.name}</span>
+                            <span class="nutrient-value">
+                                ${value}
+                                <span class="nutrient-unit">${nutrient.unit}</span>
+                            </span>
+                        </div>
+                    `;
+                    const kcalSpecificHTML = `
+                        <span class="name">${nutrient.name}</span>
+                        <span class="value">
+                            ${value}
+                            <span class="unit">${nutrient.unit}</span>
+                        </span>
+                    `;
+
+                    if (nutrient.key === 'kcal') {
+                        kcalHTML = kcalSpecificHTML;
+                    } else if (['p', 'f', 'c'].includes(nutrient.key)) {
+                        macroHTML += commonNutrientHTML;
+                    } else {
+                        otherHTML += commonNutrientHTML;
+                    }
+                });
+
+                kcalDisplayEl.innerHTML = kcalHTML;
+                macroNutrientsGridEl.innerHTML = macroHTML;
+                otherNutrientsGridEl.innerHTML = otherHTML;
             }
 
 
             function updateUI() {
-                if (!mainContent || !statusPrompt || !foodSelection || !nutritionDisplay || !hintBar || !foodGrid || !weightDisplayNutrition || !nutrientGridContainer || !nutrientGrid || !btnAddWeight || !btnResetWeight) {
+                if (!mainContent || !statusPrompt || !foodSelection || !nutritionDisplay || !hintBar || !foodGrid || !weightDisplayNutrition || /*!nutrientGridContainer || !nutrientGrid ||*/ !nutrientDetailsContainer || !btnAddWeight || !btnResetWeight) {
                     console.error("DOM elements missing in updateUI"); return;
                 }
 
@@ -348,8 +452,8 @@
                         if (unitColors[formattedWeight.unit]) { weightUnit.classList.add(unitColors[formattedWeight.unit]); }
                     }
 
-                    // Generate and Update Nutrient Grid
-                    generateNutrientGridHTML();
+                    // Populate Nutrient Displays
+                    populateNutrientDisplays();
 
                     if (isWeighing) {
                          hintTextVal = "旋转滚动查看, 短按去皮";
@@ -411,9 +515,9 @@
                 currentWeight = 0.0;
                 isFoodConfirmed = false;
                 selectedFoodIndex = 0;
-                // selectedNutrientIndex = 0; // Not needed for highlight
                 currentUnitIndex = 0;
-                if(nutrientGridContainer) nutrientGridContainer.scrollTop = 0;
+                const nutrientDetailsContainerEl = document.getElementById('nutrient-details-container');
+                if(nutrientDetailsContainerEl) nutrientDetailsContainerEl.scrollTop = 0;
                 if(mainContent) updateUI();
             }
 
@@ -440,9 +544,10 @@
                  if (isFoodConfirmed) {
                      const isWeighing = currentWeight > 0.05;
                      if (isWeighing) { // Scroll nutrient list
-                         if (nutrientGridContainer) {
-                             const scrollAmount = nutrientGridContainer.clientHeight * 0.6;
-                             nutrientGridContainer.scrollBy({ top: direction * scrollAmount, behavior: 'smooth' });
+                         const nutrientDetailsContainerEl = document.getElementById('nutrient-details-container');
+                         if (nutrientDetailsContainerEl) {
+                             const scrollAmount = nutrientDetailsContainerEl.clientHeight * 0.6;
+                             nutrientDetailsContainerEl.scrollBy({ top: direction * scrollAmount, behavior: 'smooth' });
                          }
                      } else { // Rotate units
                          currentUnitIndex = (currentUnitIndex + direction + units.length) % units.length;
