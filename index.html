@@ -128,39 +128,43 @@
         <p class="subtitle">产品中心 - 胡中华</p>
 
         <h2>原型页面结构:</h2>
-        <ul class="tree">
-            <li>
-                <a href="main_menu.html">主菜单 (Main Menu)</a>
-                <ul>
-                    <li><a href="general_weighing.html">通用称重 (General Weighing)</a></li>
-                    <li>
-                        <a href="coffee_scale_menu.html">咖啡秤 (Coffee Scale)</a>
-                        <ul>
-                            <li><a href="coffee_pour_over.html">手冲模式 1</a></li>
-                            <li><a href="coffee_pour_over_2.html">手冲模式 2 (带比例)</a></li>
-                            <li><a href="coffee_espresso.html">意式模式 1 (自动计时)</a></li>
-                        </ul>
-                    </li>
-                    <li><a href="nutrition_scale_connect_app.html">营养秤 (首次设置/连接App)</a></li>
-                    <li><a href="nutrition_scale.html">营养秤 (直接进入)</a></li>
-                    <li><a href="timed_weighing.html">倒计时 (Countdown Timer)</a></li>
-                    <li>
-                        <a href="settings_menu.html">设置 (Settings)</a>
-                        <ul>
-                            <li><a href="settings_factory_reset.html">恢复出厂设置</a></li>
-                            <li><a href="settings_about.html">关于设备</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
-            <li> <span class="category-title">电量与充电模拟:</span>
-                <ul>
-                    <li><a href="low_battery.html">低电量与关机流程</a></li>
-                    <li><a href="Power_off.html">返回/关机演示 (Back/Shutdown Demo)</a></li>
-                    <li><a href="charging_status.html">充电状态显示</a></li>
-                </ul>
-            </li>
-        </ul>
+        <div style="display: flex; justify-content: space-between;">
+            <ul class="tree" style="width: 48%;">
+                <li>
+                    <a href="main_menu.html">主菜单</a>
+                    <ul>
+                        <li><a href="general_weighing.html">通用称重</a></li>
+                        <li>
+                            <a href="coffee_scale_menu.html">咖啡秤</a>
+                            <ul>
+                                <li><a href="coffee_pour_over.html">手冲模式 1</a></li>
+                                <li><a href="coffee_pour_over_2.html">手冲模式 2</a></li>
+                                <li><a href="coffee_espresso.html">意式模式 1</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="nutrition_scale_connect_app.html">营养秤连接App</a></li>
+                        <li><a href="nutrition_scale.html">营养秤</a></li>
+                        <li><a href="timed_weighing.html">倒计时</a></li>
+                        <li>
+                            <a href="settings_menu.html">设置</a>
+                            <ul>
+                                <li><a href="settings_factory_reset.html">恢复出厂设置</a></li>
+                                <li><a href="settings_about.html">关于设备</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="tree" style="width: 48%;">
+                <li> <span class="category-title">电量与充电模拟:</span>
+                    <ul>
+                        <li><a href="low_battery.html">低电量与关机</a></li>
+                        <li><a href="Power_off.html">返回与关机演示</a></li>
+                        <li><a href="charging_status.html">充电状态</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
     </div>
 
 </body>

@@ -155,12 +155,8 @@
     </div>
 
     <div class="interaction-controls">
-        <button id="btn-rotate-left" class="control-button" title="模拟向左旋转">← 旋转</button>
-        <button id="btn-rotate-right" class="control-button" title="模拟向右旋转">旋转 →</button>
-        <button id="btn-short-press" class="control-button" title="模拟短按去皮/确认">确认/去皮</button>
         <button id="btn-long-press" class="control-button secondary" title="模拟长按旋钮">长按 (返回/关机)</button>
         <button id="btn-return-index" class="control-button secondary" title="返回目录页面">返回目录</button>
-        <button id="btn-add-weight" class="control-button" style="background-color: #10b981;">加重量</button>
     </div>
 
     <script>
@@ -173,12 +169,8 @@
 
 
         // Interaction Buttons
-        const btnRotateLeft = document.getElementById('btn-rotate-left');
-        const btnRotateRight = document.getElementById('btn-rotate-right');
-        const btnShortPress = document.getElementById('btn-short-press');
         const btnLongPress = document.getElementById('btn-long-press');
         const btnReturnIndex = document.getElementById('btn-return-index');
-        const btnAddWeight = document.getElementById('btn-add-weight');
 
         // --- State Variables ---
         let currentWeight = 168.8;
@@ -275,24 +267,6 @@
             }
         }
 
-        function rotateUnit(direction) {
-            currentUnitIndex = (currentUnitIndex + direction + units.length) % units.length;
-            updateDisplay();
-        }
-
-        function tareWeight() {
-            currentWeight = 0.0; updateDisplay();
-            tareIndicator.classList.add('visible'); if (tareTimeout) { clearTimeout(tareTimeout); }
-            tareTimeout = setTimeout(() => { tareIndicator.classList.remove('visible'); tareTimeout = null; }, 1000);
-        }
-
-        function addWeight() {
-            currentWeight += Math.random() * 50 + 10; updateDisplay();
-        }
-
-        function handleShortPress() {
-            tareWeight();
-        }
 
         function simulateDirectPowerOff() {
             console.log("Simulating Direct Power Off - Black Screen");
@@ -311,7 +285,7 @@
         }
 
         function disableAllButtons() {
-              [btnRotateLeft, btnRotateRight, btnShortPress, btnLongPress, btnReturnIndex, btnAddWeight].forEach(btn => {
+              [btnLongPress, btnReturnIndex].forEach(btn => { // Removed other buttons
                 if(btn) btn.disabled = true;
               });
         }
@@ -392,11 +366,6 @@
         }
 
         // --- Event Listeners ---
-        btnRotateLeft.addEventListener('click', () => rotateUnit(-1));
-        btnRotateRight.addEventListener('click', () => rotateUnit(1));
-        btnShortPress.addEventListener('click', handleShortPress);
-        btnAddWeight.addEventListener('click', addWeight);
-
         btnReturnIndex.addEventListener('click', () => {
             console.log("Returning to index page...");
             window.location.href = 'index.html';
