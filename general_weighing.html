@@ -210,29 +210,22 @@
         // --- Functions ---
 
         function getDecimalPlaces(weight, unit) {
-            // 根据不同单位和重量范围返回应显示的小数位数
-            if (unit === 'g' || unit === 'ml') {
-                if (weight < 500) return 1;        // 0.3-500g: ±0.5g
-                if (weight <= 1000) return 0;      // 500.1-1000g: ±1g
-                if (weight <= 2000) return 0;      // 1000.1-2000g: ±2g
-                if (weight <= 3000) return 0;      // 2000.5-3000g: ±3g
-                if (weight <= 4000) return 0;      // 3000.5-4000g: ±4g
-                return 0;                          // 4000.5-5000g: ±5g
+            // 根据新的分度值规则返回应显示的小数位数
+            if (unit === 'g') {
+                if (weight < 1000) return 1; // 1g - 999.9g: 0.1g
+                return 0;                    // >= 1000g: 1g
+            } else if (unit === 'ml') {
+                if (weight < 1000) return 1; // 1ml - 999.9ml: 0.1ml
+                return 0;                    // >= 1000ml: 1ml
             } else if (unit === 'oz') {
-                if (weight < 17.64) return 2;      // ~500g
-                if (weight < 35.27) return 1;      // ~1000g
-                return 0;
+                return 2; // 始终 0.01oz
             } else if (unit === 'fl:oz') {
-                if (weight < 16.91) return 2;      // ~500ml
-                if (weight < 33.81) return 1;      // ~1000ml
-                return 0;
+                return 2; // 始终 0.01 fl:oz
             } else if (unit === 'lb') {
-                if (weight < 1.1) return 3;        // ~500g
-                if (weight < 2.2) return 2;        // ~1000g
-                if (weight < 4.4) return 2;        // ~2000g
-                return 1;
+                if (weight < 2.205) return 3; // < 2.205lb: 0.001lb
+                return 2;                     // >= 2.205lb: 0.01lb
             }
-            return 1; // 默认返回1位小数
+            return 1; // 默认返回1位小数 (作为备用)
         }
 
         function updateDisplay() {
