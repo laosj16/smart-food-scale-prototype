@@ -91,14 +91,16 @@
             左右旋转切换单位 , 短按“TARE”去皮
         </div>
 
-        <div id="low-battery-popup" class="overlay" style="background-color: rgba(255, 0, 0, 0.8); color: white; padding: 20px; border-radius: 10px;">
+        <div id="low-battery-screen" class="overlay" style="background-color: rgba(255, 0, 0, 0.8); color: white; padding: 20px; border-radius: 10px;">
             <h3 class="overlay-title">电量不足</h3>
             <p class="overlay-message">请尽快充电</p>
+            <button id="btn-return-low" class="control-button secondary">返回</button>
         </div>
 
-        <div id="empty-battery-popup" class="overlay" style="background-color: rgba(255, 0, 0, 0.8); color: white; padding: 20px; border-radius: 10px;">
+        <div id="empty-battery-screen" class="overlay" style="background-color: rgba(255, 0, 0, 0.8); color: white; padding: 20px; border-radius: 10px;">
             <h3 class="overlay-title">电量耗尽</h3>
             <p class="overlay-message">设备即将自动关机。</p>
+            <button id="btn-return-empty" class="control-button secondary">返回</button>
         </div>
 
          <div id="shutdown-screen" class="overlay">
