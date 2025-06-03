@@ -108,16 +108,16 @@
             左右旋转切换单位 , 短按“TARE”去皮
         </div>
 
-        <div id="charging-connected-popup" class="overlay">
-            <i class="fas fa-charging-station overlay-icon" style="color: #34d399;"></i>
-            <h3 class="overlay-title">已连接充电器</h3>
-            <p class="overlay-message">设备正在充电中。</p>
+        <div id="charging-connected-screen" class="overlay" style="background-color: #1a1a1a; color: white; padding: 20px; border-radius: 0px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <i class="fas fa-charging-station overlay-icon" style="color: #34d399; font-size: 60px; margin-bottom: 20px;"></i>
+            <h3 class="overlay-title" style="font-size: 28px; margin-bottom: 10px;">已连接充电器</h3>
+            <p class="overlay-message" style="font-size: 18px; margin-bottom: 30px;">设备正在充电中。</p>
         </div>
 
-        <div id="charging-disconnected-popup" class="overlay">
-            <i class="fas fa-plug-circle-xmark overlay-icon" style="color: #f87171;"></i>
-            <h3 class="overlay-title">已断开充电器</h3>
-            <p class="overlay-message">设备停止充电。</p>
+        <div id="charging-disconnected-screen" class="overlay" style="background-color: #1a1a1a; color: white; padding: 20px; border-radius: 0px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <i class="fas fa-plug-circle-xmark overlay-icon" style="color: #f87171; font-size: 60px; margin-bottom: 20px;"></i>
+            <h3 class="overlay-title" style="font-size: 28px; margin-bottom: 10px;">已断开充电器</h3>
+            <p class="overlay-message" style="font-size: 18px; margin-bottom: 30px;">设备停止充电。</p>
         </div>
 
     </div>
@@ -129,11 +129,13 @@
 
     <script>
         // --- DOM Elements ---
+        const statusBar = document.querySelector('.status-bar'); // Added
         const statusPrompt = document.getElementById('status-prompt');
         const batteryIcon = document.getElementById('battery-icon'); // This is the main battery icon (e.g., fa-battery-half)
         const hintBar = document.getElementById('hint-bar');
-        const chargingConnectedPopup = document.getElementById('charging-connected-popup');
-        const chargingDisconnectedPopup = document.getElementById('charging-disconnected-popup');
+        const chargingConnectedScreen = document.getElementById('charging-connected-screen'); // Renamed
+        const chargingDisconnectedScreen = document.getElementById('charging-disconnected-screen'); // Renamed
+        const mainContent = document.getElementById('main-content'); // Added
         const weightDisplay = document.getElementById('weight-display'); // From general weighing
         const unitDisplay = document.getElementById('unit-display');     // From general weighing
         const tareIndicator = document.getElementById('tare-indicator'); // From general weighing
@@ -186,17 +188,27 @@
 
 
         // --- Charging Simulation Functions ---
-        function showPopup(popupElement, duration = 0) {
-            if (!popupElement) return;
-            popupElement.classList.add('visible');
-            if (duration > 0) {
-                setTimeout(() => {
-                    popupElement.classList.remove('visible');
-                }, duration);
-            }
+        function showFullScreenOverlay(overlayElement) { // Renamed from showPopup
+            if (!overlayElement) return;
+            // Hide main UI elements
+            if (statusBar) statusBar.style.display = 'none';
+            if (mainContent) mainContent.style.display = 'none';
+            if (hintBar) hintBar.style.display = 'none';
+            
+            overlayElement.classList.add('visible');
         }
 
-        function updateBatteryVisualAndStatus() {
+        function hideFullScreenOverlay(overlayElement) { // New function
+            if (!overlayElement) return;
+            overlayElement.classList.remove('visible');
+
+            // Restore main UI elements
+            if (statusBar) statusBar.style.display = 'flex';
+            if (mainContent) mainContent.style.display = 'flex';
+            if (hintBar) hintBar.style.display = 'block'; // Or 'flex' if it's a flex container
+        }
+
+        function updateBatteryVisualAndStatus(isInitialCall = false) { // Added isInitialCall
             if (!batteryIcon) return;
 
             // Update icon based on percentage
@@ -215,19 +227,40 @@
 
             // Handle charging state visual for the icon and status prompt
             if (isCharging) {
-                batteryIcon.classList.add('charging'); // Show bolt while charging
+                batteryIcon.classList.add('charging'); // Ensures .charging class is present for bolt visibility via CSS
+
+                // Change battery icon fill level based on percentage
+                batteryIcon.classList.remove('fa-battery-empty', 'fa-battery-quarter', 'fa-battery-half', 'fa-battery-three-quarters', 'fa-battery-full');
+                if (currentBatteryPercentage <= 5) batteryIcon.classList.add('fa-battery-empty');
+                else if (currentBatteryPercentage <= 35) batteryIcon.classList.add('fa-battery-quarter');
+                else if (currentBatteryPercentage <= 65) batteryIcon.classList.add('fa-battery-half');
+                else if (currentBatteryPercentage < 100) batteryIcon.classList.add('fa-battery-three-quarters'); // Use three-quarters up to 99%
+                else batteryIcon.classList.add('fa-battery-full'); // Full at 100%
+
                 if (currentBatteryPercentage === 100) {
-                    if (statusPrompt) statusPrompt.textContent = "100%";
-                    if (hintBar) hintBar.textContent = "电池已充满，请断开充电器";
-                    batteryIcon.classList.remove('charging'); // Remove bolt when full, even if connected
+                    // When 100% and charging, icon is full, green, and bolt is visible (due to .charging class)
+                    // No text change on status/hint bar
                 } else {
-                    if (statusPrompt) statusPrompt.textContent = `${currentBatteryPercentage}%`;
-                    if (hintBar) hintBar.textContent = "充电中...";
+                    // Charging, but not full. Icon shows level, green, and bolt.
+                    // No text change on status/hint bar.
                 }
+                 // Ensure statusPrompt and hintBar are at their defaults when no overlay is visible
+                if (!chargingConnectedScreen.classList.contains('visible') && !chargingDisconnectedScreen.classList.contains('visible')) {
+                    if (statusPrompt) statusPrompt.textContent = ""; 
+                    if (hintBar) hintBar.textContent = "左右旋转切换单位 , 短按“TARE”去皮";
+                }
+
             } else { // Not charging (isCharging is false)
-                batteryIcon.classList.remove('charging');
-                if (statusPrompt) statusPrompt.textContent = ""; // Empty when not charging
-                if (hintBar) hintBar.textContent = "左右旋转切换单位 , 短按“TARE”去皮";
+                batteryIcon.classList.remove('charging'); // Hide bolt
+                // Icon color reverts to default (handled by removing .charging or could be explicit)
+                // Icon fill level remains based on currentBatteryPercentage
+                batteryIcon.style.color = '#e0e0e0'; // Explicitly set to default color when not charging
+
+                 // Ensure statusPrompt and hintBar are at their defaults when not charging and no overlay is visible
+                if (!chargingConnectedScreen.classList.contains('visible') && !chargingDisconnectedScreen.classList.contains('visible')) {
+                    if (statusPrompt) statusPrompt.textContent = ""; 
+                    if (hintBar) hintBar.textContent = "左右旋转切换单位 , 短按“TARE”去皮";
+                }
             }
         }
 
@@ -237,7 +270,12 @@
 
             if (isCharging) {
                 console.log("Charger Connected");
-                showPopup(chargingConnectedPopup, 2500);
+                showFullScreenOverlay(chargingConnectedScreen);
+                setTimeout(() => {
+                    hideFullScreenOverlay(chargingConnectedScreen);
+                    updateBatteryVisualAndStatus(); // Update status/hint after overlay hides
+                }, 1000); // Show for 1 second
+
                 btnToggleCharger.textContent = "模拟断开充电器";
                 btnToggleCharger.classList.remove('success');
                 btnToggleCharger.classList.add('danger');
@@ -247,23 +285,21 @@
                     if (currentBatteryPercentage < 100) {
                         currentBatteryPercentage += 10; // Increase by 10%
                         if (currentBatteryPercentage > 100) currentBatteryPercentage = 100;
-                        updateBatteryVisualAndStatus();
                     } else { // Battery is full
                         clearInterval(chargeInterval);
                         chargeInterval = null;
-                        // isCharging is still true, currentBatteryPercentage is 100
-                        updateBatteryVisualAndStatus(); // Sets "100%" and "电池已充满，请断开充电器" and handles icon bolt
-
-                        // Ensure battery icon is full and green, bolt is handled by updateBatteryVisualAndStatus
-                        batteryIcon.classList.remove('fa-battery-empty', 'fa-battery-quarter', 'fa-battery-half', 'fa-battery-three-quarters');
-                        batteryIcon.classList.add('fa-battery-full');
-                        batteryIcon.style.color = '#34d399'; // Keep it green to show it's full and (still) connected
                     }
+                    updateBatteryVisualAndStatus(); // Update visuals during charging progress
                 }, 1500); // Interval of 1.5 seconds
 
             } else {
                 console.log("Charger Disconnected");
-                showPopup(chargingDisconnectedPopup, 2500);
+                showFullScreenOverlay(chargingDisconnectedScreen);
+                 setTimeout(() => {
+                    hideFullScreenOverlay(chargingDisconnectedScreen);
+                    updateBatteryVisualAndStatus(); // Update status/hint after overlay hides
+                }, 1000); // Show for 1 second
+
                 btnToggleCharger.textContent = "模拟连接充电器";
                 btnToggleCharger.classList.remove('danger');
                 btnToggleCharger.classList.add('success');
@@ -271,9 +307,13 @@
                     clearInterval(chargeInterval);
                     chargeInterval = null;
                 }
-                 batteryIcon.style.color = '#e0e0e0'; // Revert icon color to default
+                batteryIcon.style.color = '#e0e0e0'; // Revert icon color to default
+                // updateBatteryVisualAndStatus will handle the text and icon state
             }
-            updateBatteryVisualAndStatus();
+            // Initial updateBatteryVisualAndStatus call after isCharging toggled,
+            // but before overlay timeout, so text might not be immediately visible.
+            // The one inside setTimeout for hideFullScreenOverlay is more important for text.
+            updateBatteryVisualAndStatus(); 
         }
 
         // --- Event Listeners ---
@@ -288,9 +328,7 @@
 
         // --- Initial Setup ---
         updateWeighingDisplay(); // Show the initial weighing screen
-        updateBatteryVisualAndStatus(); // Set initial battery display and status prompt
-        // Initial hintBar text is set by updateBatteryVisualAndStatus or directly in HTML
-        // if (hintBar) hintBar.textContent = "点击按钮模拟连接/断开充电器。"; // This line is no longer needed as default is set
+        updateBatteryVisualAndStatus(true); // Set initial battery display and status prompt, pass true for initial call
 
     </script>
 
