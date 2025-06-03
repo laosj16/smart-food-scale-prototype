@@ -91,16 +91,16 @@
             左右旋转切换单位 , 短按“TARE”去皮
         </div>
 
-        <div id="low-battery-screen" class="overlay" style="background-color: rgba(255, 0, 0, 0.8); color: white; padding: 20px; border-radius: 10px;">
-            <h3 class="overlay-title">电量不足</h3>
-            <p class="overlay-message">请尽快充电</p>
-            <button id="btn-return-low" class="control-button secondary">返回</button>
+        <div id="low-battery-screen" class="overlay" style="background-color: #1a1a1a; color: white; padding: 20px; border-radius: 0px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <i class="fas fa-battery-quarter overlay-icon" style="color: #FFA500; font-size: 60px; margin-bottom: 20px;"></i>
+            <h3 class="overlay-title" style="font-size: 28px; margin-bottom: 10px;">电量不足</h3>
+            <p class="overlay-message" style="font-size: 18px; margin-bottom: 30px;">请尽快充电</p>
         </div>
 
-        <div id="empty-battery-screen" class="overlay" style="background-color: rgba(255, 0, 0, 0.8); color: white; padding: 20px; border-radius: 10px;">
-            <h3 class="overlay-title">电量耗尽</h3>
-            <p class="overlay-message">设备即将自动关机。</p>
-            <button id="btn-return-empty" class="control-button secondary">返回</button>
+        <div id="empty-battery-screen" class="overlay" style="background-color: #1a1a1a; color: white; padding: 20px; border-radius: 0px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <i class="fas fa-battery-empty overlay-icon" style="color: #ef4444; font-size: 60px; margin-bottom: 20px;"></i>
+            <h3 class="overlay-title" style="font-size: 28px; margin-bottom: 10px;">电量耗尽</h3>
+            <p class="overlay-message" style="font-size: 18px; margin-bottom: 30px;">设备即将自动关机。</p>
         </div>
 
          <div id="shutdown-screen" class="overlay">
@@ -116,23 +116,25 @@
 
     <script>
         // --- DOM Elements ---
+        const statusBar = document.querySelector('.status-bar'); // Added
         const statusPrompt = document.getElementById('status-prompt');
         const batteryIcon = document.getElementById('battery-icon');
         const hintBar = document.getElementById('hint-bar');
-        const lowBatteryPopup = document.getElementById('low-battery-popup');
-        const emptyBatteryPopup = document.getElementById('empty-battery-popup');
+        const lowBatteryScreen = document.getElementById('low-battery-screen'); // Renamed
+        const emptyBatteryScreen = document.getElementById('empty-battery-screen'); // Renamed
         const shutdownScreen = document.getElementById('shutdown-screen');
         const mainContent = document.getElementById('main-content');
         const weightDisplay = document.getElementById('weight-display');
         const unitDisplay = document.getElementById('unit-display');
         const tareIndicator = document.getElementById('tare-indicator');
 
-
         const btnSimulateLow = document.getElementById('btn-simulate-low');
         const btnSimulateEmpty = document.getElementById('btn-simulate-empty');
         const btnReturnIndex = document.getElementById('btn-return-index');
+        // const btnReturnEmpty = document.getElementById('btn-return-empty'); // Removed
 
         let isShuttingDown = false;
+        let emptyBatteryShutdownTimer = null; // Added for cancellable shutdown
 
         // --- General Weighing State (Simplified for background) ---
         let currentWeight = 168.8;
@@ -173,55 +175,73 @@
 
 
         // --- Battery Simulation Functions ---
-        function showPopup(popupElement, duration = 0) {
-            if (!popupElement) return;
-            popupElement.classList.add('visible');
-            if (duration > 0) {
-                setTimeout(() => {
-                    popupElement.classList.remove('visible');
-                }, duration);
-            }
+        function showFullScreenOverlay(overlayElement) {
+            if (!overlayElement) return;
+            // Hide main UI elements
+            if (statusBar) statusBar.style.display = 'none';
+            if (mainContent) mainContent.style.display = 'none';
+            if (hintBar) hintBar.style.display = 'none';
+            
+            overlayElement.classList.add('visible');
         }
 
-        function hidePopup(popupElement) {
-            if (!popupElement) return;
-            popupElement.classList.remove('visible');
-        }
+        function hideFullScreenOverlay(overlayElement) {
+            if (!overlayElement) return;
+            overlayElement.classList.remove('visible');
 
+            // Restore main UI elements
+            if (statusBar) statusBar.style.display = 'flex';
+            if (mainContent) mainContent.style.display = 'flex';
+            if (hintBar) hintBar.style.display = 'block'; // Or 'flex' if it's a flex container
+        }
+        
         function startBatteryBlink() {
             if (!batteryIcon) return;
             batteryIcon.classList.remove('fa-battery-full', 'fa-battery-three-quarters', 'fa-battery-half', 'fa-battery-empty');
             batteryIcon.classList.add('fa-battery-quarter');
-            batteryIcon.classList.add('blinking'); 
-            
-            if (hintBar) hintBar.textContent = "电量低于10%，请及时充电";
-            if (statusPrompt) statusPrompt.textContent = "电量不足"; // Changed from "电量低"
+            batteryIcon.classList.add('blinking');
+            // StatusPrompt and HintBar text will remain as they were before low battery warning
         }
 
         function simulateLowBatteryWarning() {
             if (isShuttingDown) return;
-            console.log("Simulating Low Battery (< 10%) over General Weighing");
-            const popupIcon = lowBatteryPopup.querySelector('.overlay-icon');
-            if(popupIcon) popupIcon.style.color = '#FFA500'; 
+            console.log("Simulating Low Battery (< 10%) - Showing Full Screen Warning then blink");
             
-            // Update popup title and clear message
-            const popupTitle = lowBatteryPopup.querySelector('.overlay-title');
-            if(popupTitle) popupTitle.textContent = "电量不足";
-            const popupMessage = lowBatteryPopup.querySelector('.overlay-message');
-            if(popupMessage) popupMessage.textContent = ""; // Clear the detailed message
+            // Ensure the low battery screen shows its original text
+            const lowBatteryTitle = lowBatteryScreen.querySelector('.overlay-title');
+            const lowBatteryMessage = lowBatteryScreen.querySelector('.overlay-message');
+            // Assuming the original text is already in the HTML, no need to set it here
+            // unless it was dynamically changed elsewhere.
+            // For clarity, let's ensure they are set to what's in the HTML:
+            lowBatteryTitle.textContent = '电量不足';
+            lowBatteryMessage.textContent = '请尽快充电';
 
-            showPopup(lowBatteryPopup, 3000); 
+
+            showFullScreenOverlay(lowBatteryScreen);
+
             setTimeout(() => {
-                startBatteryBlink(); 
-            }, 3000);
+                hideFullScreenOverlay(lowBatteryScreen);
+                startBatteryBlink(); // Start blinking after the screen automatically hides
+            }, 1000); // Automatically hide after 1 second
         }
 
         function simulateEmptyBatteryShutdown() {
             if (isShuttingDown) return;
-            isShuttingDown = true;
-            console.log("Simulating Empty Battery (0%) - Shutdown Sequence over General Weighing");
+            isShuttingDown = true; // Prevent re-triggering
+            console.log("Simulating Empty Battery (0%) - Showing Full Screen Warning, then Shutdown");
 
-            if (statusPrompt) statusPrompt.textContent = "电量耗尽";
+            // Ensure the empty battery screen shows its original text
+            const emptyBatteryTitle = emptyBatteryScreen.querySelector('.overlay-title');
+            const emptyBatteryMessage = emptyBatteryScreen.querySelector('.overlay-message');
+            emptyBatteryTitle.textContent = '电量耗尽';
+            emptyBatteryMessage.textContent = '设备即将自动关机。';
+
+            showFullScreenOverlay(emptyBatteryScreen);
+            
+            // Do NOT change statusPrompt or hintBar text when emptyBatteryScreen is shown
+            // if (statusPrompt) statusPrompt.textContent = "电量耗尽"; 
+            // if (hintBar) hintBar.textContent = "设备即将关机..."; 
+
              if (batteryIcon) {
                 batteryIcon.classList.remove('blinking'); 
                 batteryIcon.classList.remove('fa-battery-full', 'fa-battery-three-quarters', 'fa-battery-half', 'fa-battery-quarter');
@@ -230,20 +250,17 @@
                 batteryIcon.style.opacity = '1'; 
             }
 
-            showPopup(emptyBatteryPopup); 
-            if (hintBar) hintBar.textContent = "设备即将关机..."; 
-
             if (btnSimulateLow) btnSimulateLow.disabled = true;
             if (btnSimulateEmpty) btnSimulateEmpty.disabled = true;
 
-            setTimeout(() => {
-                console.log("Device shutting down...");
-                hidePopup(emptyBatteryPopup);
-                if (mainContent) mainContent.style.opacity = '0';
-                showPopup(shutdownScreen);
-                if (hintBar) hintBar.textContent = "已关机"; 
-                if (statusPrompt) statusPrompt.textContent = "已关机"; 
-            }, 3000);
+            // Start a timer for automatic shutdown
+            clearTimeout(emptyBatteryShutdownTimer); // Clear any existing timer
+            emptyBatteryShutdownTimer = setTimeout(() => {
+                console.log("Device shutting down automatically...");
+                hideFullScreenOverlay(emptyBatteryScreen);
+                showFullScreenOverlay(shutdownScreen);
+                // No need to update hintBar or statusPrompt here as they are hidden by shutdownScreen
+            }, 3000); // 3 seconds to shutdown
         }
 
         // --- Event Listeners ---
@@ -253,6 +270,9 @@
         if (btnSimulateEmpty) {
             btnSimulateEmpty.addEventListener('click', simulateEmptyBatteryShutdown);
         }
+        // Removed btnReturnLow event listener as the screen auto-hides
+        // Removed btnReturnEmpty event listener as the button is removed
+
         if (btnReturnIndex) {
             btnReturnIndex.addEventListener('click', () => {
                 window.location.href = 'index.html';
