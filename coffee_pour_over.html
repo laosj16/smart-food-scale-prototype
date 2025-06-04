@@ -250,7 +250,53 @@
                 } 
                 ratioValue.textContent = `1:${ratio}`; 
             }
-            switch (currentState) { case State.INIT: promptText = "现在，请放上咖啡量杯壶"; hintTextVal = "等待放置..."; shortPressAction = 'TARE'; break; case State.WAITING_FILTER: promptText = "好的，请放上滤杯与滤纸"; hintTextVal = "等待放置..."; shortPressAction = 'TARE'; break; case State.FILTER_PLACED: promptText = "好的，请放上滤杯与滤纸"; hintTextVal = "旋转切换单位, 短按TARE去皮"; shortPressAction = 'TARE'; break; case State.WAITING_GROUNDS: promptText = "接下来，请加入咖啡粉"; hintTextVal = "等待加入..."; shortPressAction = 'TARE'; break; case State.WEIGHING_GROUNDS: promptText = "接下来，请加入咖啡粉"; hintTextVal = "旋转切换单位, 短按TARE去皮"; shortPressAction = 'TARE'; break; case State.READY_TO_POUR: promptText = "准备就绪，可以开始注水"; hintTextVal = "等待注水..."; shortPressAction = '---'; break; case State.POURING: promptText = "注水中..."; hintTextVal = "短按停止计时"; shortPressAction = '停止'; break; case State.FINISHED: promptText = "冲煮完成"; hintTextVal = "短按复位 / 拿走滤杯"; shortPressAction = '复位'; break; case State.WEIGHING_LIQUID: promptText = "计算液重..."; hintTextVal = "短按 TARE 复位"; shortPressAction = '复位'; break; }
+            switch (currentState) { 
+                case State.INIT: 
+                    promptText = "等待放置...."; 
+                    hintTextVal = "请放上咖啡量杯壶"; 
+                    shortPressAction = 'TARE'; 
+                    break; 
+                case State.WAITING_FILTER: 
+                    promptText = "等待放置...."; 
+                    hintTextVal = "请放上滤杯与滤纸"; 
+                    shortPressAction = 'TARE'; 
+                    break; 
+                case State.FILTER_PLACED: 
+                    promptText = "等待去皮...."; 
+                    hintTextVal = "通过旋转切换单位, 短按TARE去皮"; 
+                    shortPressAction = 'TARE'; 
+                    break; 
+                case State.WAITING_GROUNDS: 
+                    promptText = "等待放置...."; 
+                    hintTextVal = "接下来，请加入咖啡粉"; 
+                    shortPressAction = 'TARE'; 
+                    break; 
+                case State.WEIGHING_GROUNDS: 
+                    promptText = "等待去皮...."; 
+                    hintTextVal = "通过旋转切换单位, 短按TARE去皮"; 
+                    shortPressAction = 'TARE'; 
+                    break; 
+                case State.READY_TO_POUR: 
+                    promptText = "等待注水..."; 
+                    hintTextVal = "准备就绪，可以开始注水"; 
+                    shortPressAction = '---'; 
+                    break; 
+                case State.POURING: 
+                    promptText = "注水中..."; 
+                    hintTextVal = "短按旋钮停止计时"; 
+                    shortPressAction = '停止'; 
+                    break; 
+                case State.FINISHED: 
+                    promptText = "冲煮完成"; 
+                    hintTextVal = "短按旋钮复位 / 也可拿走滤杯显示粉液比"; 
+                    shortPressAction = '复位'; 
+                    break; 
+                case State.WEIGHING_LIQUID: 
+                    promptText = "计算液重"; 
+                    hintTextVal = "短按 TARE 复位"; 
+                    shortPressAction = '复位'; 
+                    break; 
+            }
             statusPrompt.textContent = promptText; 
             if (!longPressActive && hintBar) hintBar.textContent = hintTextVal; 
             btnShortPress.textContent = `${shortPressAction === '---' ? '---' : shortPressAction} (短按)`; btnShortPress.disabled = !shortPressEnabled; btnRotateLeft.disabled = !enableRotation; btnRotateRight.disabled = !enableRotation;
