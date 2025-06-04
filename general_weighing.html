@@ -159,6 +159,7 @@
         <button id="btn-rotate-right" class="control-button" title="模拟向右旋转">旋转 →</button>
         <button id="btn-short-press" class="control-button" title="模拟短按去皮/确认">确认/去皮</button>
         <button id="btn-long-press" class="control-button secondary" title="模拟长按旋钮">长按 (返回/关机)</button>
+        <button id="btn-toggle-language" class="control-button secondary" title="切换到英文版">Switch to English</button>
         <button id="btn-return-index" class="control-button secondary" title="返回目录页面">返回目录</button>
         <button id="btn-add-weight" class="control-button" style="background-color: #10b981;">加重量</button>
     </div>
@@ -179,6 +180,7 @@
         const btnLongPress = document.getElementById('btn-long-press');
         const btnReturnIndex = document.getElementById('btn-return-index');
         const btnAddWeight = document.getElementById('btn-add-weight');
+        const btnToggleLanguage = document.getElementById('btn-toggle-language');
 
         // --- State Variables ---
         let currentWeight = 168.8;
@@ -212,20 +214,26 @@
         function getDecimalPlaces(weight, unit) {
             // 根据新的分度值规则返回应显示的小数位数
             if (unit === 'g') {
-                if (weight < 1000) return 1; // 1g - 999.9g: 0.1g
-                return 0;                    // >= 1000g: 1g
+                if (weight < 1000) return 1; // <1000g 分度值0.1g
+                return 0;                    // >=1000g 分度值1g
             } else if (unit === 'ml') {
-                if (weight < 1000) return 1; // 1ml - 999.9ml: 0.1ml
-                return 0;                    // >= 1000ml: 1ml
-            } else if (unit === 'oz') {
-                return 2; // 始终 0.01oz
+                if (weight < 1000) return 1; // <1000ml 分度值0.1ml
+                return 0;                    // >=1000ml 分度值1ml
             } else if (unit === 'fl:oz') {
-                return 2; // 始终 0.01 fl:oz
+                if (weight < 100) return 3;  // ＜100 fl:oz 分度值0.005fl：oz
+                return 2;                    // ≥100 fl:oz 分度值0.05fl：oz
+            } else if (unit === 'oz') {
+                if (weight < 100) return 3;  // ＜100oz 分度值0.005 oz
+                return 2;                    // ≥100oz 分度值0.05oz
             } else if (unit === 'lb') {
-                if (weight < 2.205) return 3; // < 2.205lb: 0.001lb
-                return 2;                     // >= 2.205lb: 0.01lb
+                if (weight < 2) return 4;    // ＜2lb 分度值0.0005 lb
+                return 3;                    // ≥2lb 分度值0.002lb
             }
             return 1; // 默认返回1位小数 (作为备用)
+        }
+
+        function roundToIncrement(value, increment) {
+            return Math.round(value / increment) * increment;
         }
 
         function updateDisplay() {
@@ -259,12 +267,56 @@
 
             // 根据重量范围确定小数位数
             const decimalPlaces = getDecimalPlaces(convertedWeight, currentUnit);
+            let adjustedWeight = convertedWeight;
+
+            // 根据分度值调整重量
+            // 对于 g 和 ml，当分度值为 0.1 或 1 时，toFixed 的行为已经符合要求。
+            // 但为了处理更复杂的分度值（如此处其他单位），我们进行显式调整。
+            if (currentUnit === 'g') {
+                if (adjustedWeight < 1000) {
+                    // adjustedWeight = roundToIncrement(adjustedWeight, 0.1); // toFixed(1) 效果一致
+                } else {
+                    // adjustedWeight = roundToIncrement(adjustedWeight, 1);    // toFixed(0) 效果一致
+                }
+            } else if (currentUnit === 'ml') {
+                if (adjustedWeight < 1000) {
+                    // adjustedWeight = roundToIncrement(adjustedWeight, 0.1); // toFixed(1) 效果一致
+                } else {
+                    // adjustedWeight = roundToIncrement(adjustedWeight, 1);    // toFixed(0) 效果一致
+                }
+            } else if (currentUnit === 'fl:oz') {
+                if (adjustedWeight < 100) {
+                    adjustedWeight = roundToIncrement(adjustedWeight, 0.005);
+                } else {
+                    adjustedWeight = roundToIncrement(adjustedWeight, 0.05);
+                }
+            } else if (currentUnit === 'oz') {
+                if (adjustedWeight < 100) {
+                    adjustedWeight = roundToIncrement(adjustedWeight, 0.005);
+                } else {
+                    adjustedWeight = roundToIncrement(adjustedWeight, 0.05);
+                }
+            } else if (currentUnit === 'lb') {
+                if (adjustedWeight < 2) {
+                    adjustedWeight = roundToIncrement(adjustedWeight, 0.0005);
+                } else {
+                    adjustedWeight = roundToIncrement(adjustedWeight, 0.002);
+                }
+            }
             
             // 处理接近零的情况
-            if (Math.abs(convertedWeight) < 0.3 && (currentUnit === 'g' || currentUnit === 'ml')) {
-                displayWeight = '0.0';
+            // 注意：这里我们用 convertedWeight 判断是否接近零，因为 adjustedWeight 可能因为取整而远离零
+            if (Math.abs(convertedWeight) < 0.0001) { // 使用一个更小的值来判断是否为零，避免浮点问题
+                 displayWeight = (0).toFixed(decimalPlaces); // 确保零也显示正确的小数位数
+            } else if (Math.abs(convertedWeight) < 0.3 && (currentUnit === 'g' || currentUnit === 'ml')) {
+                 // 对于g/ml的特殊0.0显示逻辑，如果调整后不为0，则按调整后的显示
+                 if (Math.abs(adjustedWeight) < 0.0001 && decimalPlaces === 1) { // 如果调整后为0且要求1位小数
+                    displayWeight = '0.0';
+                 } else {
+                    displayWeight = adjustedWeight.toFixed(decimalPlaces);
+                 }
             } else {
-                displayWeight = convertedWeight.toFixed(decimalPlaces);
+                displayWeight = adjustedWeight.toFixed(decimalPlaces);
             }
             
             weightDisplay.textContent = displayWeight;
@@ -311,7 +363,7 @@
         }
 
         function disableAllButtons() {
-              [btnRotateLeft, btnRotateRight, btnShortPress, btnLongPress, btnReturnIndex, btnAddWeight].forEach(btn => {
+              [btnRotateLeft, btnRotateRight, btnShortPress, btnLongPress, btnReturnIndex, btnAddWeight, btnToggleLanguage].forEach(btn => {
                 if(btn) btn.disabled = true;
               });
         }
@@ -405,6 +457,12 @@
         btnLongPress.addEventListener('mousedown', startLongPress);
         btnLongPress.addEventListener('mouseup', cancelLongPress);
         btnLongPress.addEventListener('mouseleave', cancelLongPress); 
+
+        if (btnToggleLanguage) {
+            btnToggleLanguage.addEventListener('click', () => {
+                window.location.href = 'general_weighing copy.html';
+            });
+        }
 
         // --- Initialization ---
         window.addEventListener('load', () => {

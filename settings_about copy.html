@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>关于设备 - 智能食物秤 Pro</title>
+    <title>About Device - Smart Food Scale Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,11 +22,8 @@
         .about-item .label { font-size: 16px; color: #a0a0a0; }
         .about-item .value { font-size: 16px; color: #e0e0e0; font-weight: 500; text-align: right; }
         .hint-bar { text-align: center; padding: 8px 10px 12px 10px; background-color: rgba(0, 0, 0, 0.3); font-size: 15px; color: #b0b0b0; height: 36px; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: absolute; bottom: 0; left: 0; width: 100%; z-index: 5; }
-        
-        /* Minimal overlay for long press visual feedback if needed, or can be omitted if no progress shown */
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; color: white; z-index: 10; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease; font-size: 1.2rem; }
         .overlay.visible { opacity: 1; visibility: visible; }
-
         .interaction-controls { position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(240, 240, 240, 0.95); backdrop-filter: blur(5px); padding: 0.75rem 1rem; border-top: 1px solid #ccc; display: flex; justify-content: center; align-items: center; gap: 0.5rem; z-index: 100; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); }
         .control-button { padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 500; background-color: #4f46e5; color: white; border: none; border-radius: 0.375rem; cursor: pointer; transition: background-color 0.2s ease, transform 0.1s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .control-button:hover { background-color: #4338ca; }
@@ -36,54 +33,52 @@
     </style>
 </head>
 <body>
-
     <div class="device-screen">
         <div class="status-bar">
             <i class="fa-brands fa-bluetooth-b"></i>
-            <span id="status-prompt">关于设备</span>
+            <span id="status-prompt">About Device</span>
             <i class="fa-solid fa-battery-full"></i>
         </div>
 
         <div class="main-content">
             <ul class="about-list">
                 <li class="about-item">
-                    <span class="label">设备名称</span>
-                    <span class="value">智能食物秤 Pro</span>
+                    <span class="label">Device Name</span>
+                    <span class="value">Smart Food Scale Pro</span>
                 </li>
                 <li class="about-item">
-                    <span class="label">型号</span>
+                    <span class="label">Model</span>
                     <span class="value">CK863BLE</span>
                 </li>
                 <li class="about-item">
-                    <span class="label">软件版本</span>
+                    <span class="label">Software Version</span>
                     <span class="value">1.0.1</span>
                 </li>
                 <li class="about-item">
-                    <span class="label">固件版本</span>
+                    <span class="label">Firmware Version</span>
                     <span class="value">FW-0.9.9</span>
                 </li>
                 <li class="about-item">
-                    <span class="label">版权</span>
+                    <span class="label">Copyright</span>
                     <span class="value">© 2025 Shenzhen Unique Scales Co., Ltd.</span>
                 </li>
             </ul>
         </div>
 
         <div id="hint-bar" class="hint-bar">
-            长按旋钮返回上一级
+            Long press knob to return to previous menu
         </div>
         
-        <div id="long-press-feedback-overlay" class="overlay">返回中...</div>
+        <div id="long-press-feedback-overlay" class="overlay">Returning...</div>
 
     </div>
 
     <div class="interaction-controls">
-        <!-- Rotate and Short Press buttons are not primary for this page's direct content -->
         <button id="btn-rotate-left" class="control-button" title="模拟向左旋转" disabled>← 旋转</button>
         <button id="btn-rotate-right" class="control-button" title="模拟向右旋转" disabled>旋转 →</button>
         <button id="btn-short-press" class="control-button" title="模拟短按确认" disabled>确认 (短按)</button>
         <button id="btn-long-press" class="control-button secondary" title="模拟长按旋钮">长按 (返回)</button>
-        <button id="btn-toggle-language" class="control-button secondary" title="切换到英文版">Switch to English</button>
+        <button id="btn-toggle-language" class="control-button secondary" title="Switch to Chinese version">切换中文</button>
         <button id="btn-return-index" class="control-button secondary" title="返回目录页面">返回目录</button>
     </div>
 
@@ -99,46 +94,42 @@
 
             let longPressTimer = null;
             let longPressActive = false;
-            const LONG_PRESS_DURATION_BACK = 1000; // 1 second
+            const LONG_PRESS_DURATION_BACK = 1000; 
 
             function startLongPress() {
                 if (longPressActive) return;
                 longPressActive = true;
-                if(longPressFeedbackOverlay) longPressFeedbackOverlay.classList.add('visible'); // Show feedback
+                if(longPressFeedbackOverlay) longPressFeedbackOverlay.classList.add('visible'); 
 
                 longPressTimer = setTimeout(() => {
                     if (longPressActive) {
                         console.log("Long press activated: Navigating back to settings menu.");
-                        window.location.href = 'settings_menu.html';
+                        window.location.href = 'settings_menu copy.html'; // Link to English settings menu
                     }
                 }, LONG_PRESS_DURATION_BACK);
             }
 
             function cancelLongPress() {
                 if (longPressTimer) clearTimeout(longPressTimer);
-                if(longPressFeedbackOverlay) longPressFeedbackOverlay.classList.remove('visible'); // Hide feedback
+                if(longPressFeedbackOverlay) longPressFeedbackOverlay.classList.remove('visible'); 
                 longPressActive = false;
             }
 
-            // Event Listeners
             if(btnLongPress) {
                 btnLongPress.addEventListener('mousedown', startLongPress);
                 btnLongPress.addEventListener('mouseup', cancelLongPress);
                 btnLongPress.addEventListener('mouseleave', cancelLongPress);
             }
             if(btnReturnIndex) btnReturnIndex.addEventListener('click', () => { window.location.href = 'index.html'; });
-
             if (btnToggleLanguage) {
                 btnToggleLanguage.addEventListener('click', () => {
-                    window.location.href = 'settings_about copy.html';
+                    window.location.href = 'settings_about.html';
                 });
             }
 
-            // Initial Setup
-            if(statusPrompt) statusPrompt.textContent = "关于设备";
-            if(hintBar) hintBar.textContent = "长按旋钮返回上一级";
+            if(statusPrompt) statusPrompt.textContent = "About Device";
+            if(hintBar) hintBar.textContent = "Long press knob to return to previous menu";
         });
     </script>
-
 </body>
 </html>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>恢复出厂设置 - 智能食物秤 Pro</title>
+    <title>Factory Reset - Smart Food Scale Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,31 +18,8 @@
         .main-content { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; width: 100%; box-sizing: border-box; }
         .warning-icon { font-size: 48px; color: #facc15; margin-bottom: 1rem; }
         .warning-text { font-size: 17px; margin-bottom: 1.5rem; line-height: 1.6; }
-        .options-list { 
-            list-style: none; 
-            padding: 0; 
-            margin: 0 auto 1.5rem auto; /* Added bottom margin */
-            width: auto; /* Allow to size based on content */
-            display: flex; 
-            justify-content: center; 
-            gap: 1rem; /* Space between horizontal items */
-        }
-        .option-item { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            padding: 10px 25px; /* Adjusted padding */
-            margin-bottom: 0; /* Removed bottom margin for horizontal layout */
-            border-radius: 8px; 
-            transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out; 
-            border: 2px solid transparent; 
-            cursor: default; 
-            background-color: rgba(255, 255, 255, 0.05); 
-            font-size: 17px; 
-            font-weight: 500; 
-            min-width: 100px; /* Minimum width for each button */
-            text-align: center;
-        }
+        .options-list { list-style: none; padding: 0; margin: 0 auto 1.5rem auto; width: auto; display: flex; justify-content: center; gap: 1rem; }
+        .option-item { display: flex; justify-content: center; align-items: center; padding: 10px 25px; margin-bottom: 0; border-radius: 8px; transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out; border: 2px solid transparent; cursor: default; background-color: rgba(255, 255, 255, 0.05); font-size: 17px; font-weight: 500; min-width: 100px; text-align: center; }
         .option-item.selected { background-color: #4a5568; border-color: #718096; color: #ffffff; }
         .hint-bar { text-align: center; padding: 8px 10px 12px 10px; background-color: rgba(0, 0, 0, 0.3); font-size: 15px; color: #b0b0b0; height: 36px; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: absolute; bottom: 0; left: 0; width: 100%; z-index: 5; }
         .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; z-index: 10; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease; }
@@ -64,28 +41,27 @@
     </style>
 </head>
 <body>
-
     <div class="device-screen">
         <div class="status-bar">
             <i class="fa-brands fa-bluetooth-b"></i>
-            <span id="status-prompt">恢复出厂设置</span>
+            <span id="status-prompt">Factory Reset</span>
             <i class="fa-solid fa-battery-full"></i>
         </div>
 
         <div class="main-content">
             <i class="fas fa-triangle-exclamation warning-icon"></i>
             <p class="warning-text">
-                确定要恢复出厂设置吗？<br>
-                所有用户数据和个性化设置都将被清除，设备将恢复到初始状态。此操作无法撤销。
+                Are you sure you want to perform a factory reset?<br>
+                All user data and personalized settings will be erased, and the device will revert to its initial state. This action cannot be undone.
             </p>
             <ul class="options-list">
-                <li class="option-item" data-action="cancel">取消</li>
-                <li class="option-item" data-action="confirm">确认</li>
+                <li class="option-item" data-action="cancel">Cancel</li>
+                <li class="option-item" data-action="confirm">Confirm</li>
             </ul>
         </div>
 
         <div id="hint-bar" class="hint-bar">
-            旋转选择, 短按确认
+            Rotate to select, short press to confirm
         </div>
 
         <div id="action-overlay" class="overlay">
@@ -105,7 +81,7 @@
         <button id="btn-rotate-right" class="control-button" title="模拟向右旋转">旋转 →</button>
         <button id="btn-short-press" class="control-button" title="模拟短按确认">确认 (短按)</button>
         <button id="btn-long-press" class="control-button secondary" title="模拟长按旋钮">长按 (返回)</button>
-        <button id="btn-toggle-language" class="control-button secondary" title="切换到英文版">Switch to English</button>
+        <button id="btn-toggle-language" class="control-button secondary" title="Switch to Chinese version">切换中文</button>
         <button id="btn-return-index" class="control-button secondary" title="返回目录页面">返回目录</button>
     </div>
 
@@ -126,15 +102,15 @@
             const btnReturnIndex = document.getElementById('btn-return-index');
             const btnToggleLanguage = document.getElementById('btn-toggle-language');
 
-            let selectedIndex = 0; // 0 for Cancel, 1 for Confirm
+            let selectedIndex = 0; 
             let longPressTimer = null;
             let longPressActive = false;
-            const LONG_PRESS_DURATION_BACK = 1000; // 1 second for back navigation
+            const LONG_PRESS_DURATION_BACK = 1000; 
 
             let autoReturnTimer = null;
             let countdownInterval = null;
-            let countdownValue = 5; // seconds
-            const AUTO_RETURN_DELAY = 5000; // 5 seconds in milliseconds
+            let countdownValue = 5; 
+            const AUTO_RETURN_DELAY = 5000; 
 
             const radius = progressCircle ? parseFloat(progressCircle.getAttribute('r')) : 0;
             const circumference = radius * 2 * Math.PI;
@@ -147,14 +123,14 @@
 
             function updateHintBarCountdown() {
                 if (!hintBar) return;
-                if (actionOverlay.classList.contains('visible')) { // If action started, clear countdown text
-                    hintBar.textContent = "旋转选择, 短按确认"; // Or specific action text
+                if (actionOverlay.classList.contains('visible')) { 
+                    hintBar.textContent = "Rotate to select, short press to confirm"; 
                     return;
                 }
                 if (countdownValue > 0) {
-                    hintBar.textContent = `旋转选择 (${countdownValue}s后返回)`;
+                    hintBar.textContent = `Rotate to select (returns in ${countdownValue}s)`;
                 } else {
-                    hintBar.textContent = `即将返回...`; 
+                    hintBar.textContent = `Returning soon...`; 
                 }
             }
 
@@ -176,7 +152,7 @@
                 autoReturnTimer = setTimeout(() => {
                     if (!actionOverlay.classList.contains('visible')) {
                         console.log("Auto-return due to inactivity.");
-                        window.location.href = 'settings_menu.html';
+                        window.location.href = 'settings_menu copy.html'; // English version
                     }
                 }, AUTO_RETURN_DELAY);
             }
@@ -184,24 +160,24 @@
             function stopAutoReturnTimer() {
                 if (autoReturnTimer) clearTimeout(autoReturnTimer);
                 if (countdownInterval) clearInterval(countdownInterval);
-                hintBar.textContent = "旋转选择, 短按确认"; // Reset hint bar
+                hintBar.textContent = "Rotate to select, short press to confirm"; 
             }
 
             function rotate(direction) {
                 if (actionOverlay.classList.contains('visible')) return; 
                 selectedIndex = (selectedIndex + direction + optionItems.length) % optionItems.length;
                 updateSelection();
-                startAutoReturnTimer(); // Reset timer on interaction
+                startAutoReturnTimer(); 
             }
 
             function handleShortPress() {
                 if (actionOverlay.classList.contains('visible')) return;
-                stopAutoReturnTimer(); // Stop auto return on explicit action
+                stopAutoReturnTimer(); 
 
                 const selectedAction = optionItems[selectedIndex].getAttribute('data-action');
 
                 if (selectedAction === 'cancel') {
-                    window.location.href = 'settings_menu.html';
+                    window.location.href = 'settings_menu copy.html'; // English version
                 } else if (selectedAction === 'confirm') {
                     performFactoryReset();
                 }
@@ -214,42 +190,41 @@
             }
 
             function performFactoryReset() {
-                stopAutoReturnTimer(); // Ensure auto-return is stopped
-                hintBar.textContent = "处理中..."; // Update hint bar during action
-                actionTextElement.textContent = "正在恢复出厂设置...";
+                stopAutoReturnTimer(); 
+                hintBar.textContent = "Processing..."; 
+                actionTextElement.textContent = "Performing factory reset...";
                 if(progressCircle) {
                     progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
                     progressCircle.style.strokeDashoffset = circumference;
-                    progressCircle.setAttribute('stroke', '#facc15'); // Yellow for progress
+                    progressCircle.setAttribute('stroke', '#facc15'); 
                 }
-                progressText.textContent = ""; // No percentage text for this animation
+                progressText.textContent = ""; 
                 actionOverlay.classList.add('visible');
                 disableAllButtons();
 
-                // Simulate progress animation (e.g., a spinning or filling circle)
                 let progress = 0;
                 const interval = setInterval(() => {
                     progress += 10;
                     setProgress(progress);
                     if (progress >= 100) {
                         clearInterval(interval);
-                        actionTextElement.textContent = "恢复完成，正在重启...";
+                        actionTextElement.textContent = "Reset complete, restarting...";
                         setTimeout(() => {
                             console.log("Factory reset complete. Navigating to main menu.");
-                            window.location.href = 'main_menu.html';
-                        }, 1500); // Delay before "restarting"
+                            window.location.href = 'main_menu copy.html'; // English version
+                        }, 1500); 
                     }
-                }, 200); // Adjust timing for animation speed
+                }, 200); 
             }
             
             function startLongPress() {
                 if (longPressActive || actionOverlay.classList.contains('visible')) return;
-                stopAutoReturnTimer(); // Stop auto return if long press starts
+                stopAutoReturnTimer(); 
                 longPressActive = true;
                 longPressTimer = setTimeout(() => {
                     if (longPressActive) { 
                         console.log("Long press activated: Navigating back to settings menu.");
-                        window.location.href = 'settings_menu.html';
+                        window.location.href = 'settings_menu copy.html'; // English version
                     }
                 }, LONG_PRESS_DURATION_BACK);
             }
@@ -257,7 +232,6 @@
             function cancelLongPress() {
                 if (longPressTimer) clearTimeout(longPressTimer);
                 longPressActive = false;
-                // If no other action is pending, restart auto-return timer
                 if (!actionOverlay.classList.contains('visible')) {
                     startAutoReturnTimer();
                 }
@@ -269,31 +243,25 @@
                 });
             }
 
-
-            // Event Listeners
             if(btnRotateLeft) btnRotateLeft.addEventListener('click', () => rotate(-1));
             if(btnRotateRight) btnRotateRight.addEventListener('click', () => rotate(1));
             if(btnShortPress) btnShortPress.addEventListener('click', handleShortPress);
             if(btnLongPress) {
                 btnLongPress.addEventListener('mousedown', startLongPress);
                 btnLongPress.addEventListener('mouseup', cancelLongPress);
-                btnLongPress.addEventListener('mouseleave', cancelLongPress); // Also cancel if mouse leaves button
+                btnLongPress.addEventListener('mouseleave', cancelLongPress); 
             }
             if(btnReturnIndex) btnReturnIndex.addEventListener('click', () => { window.location.href = 'index.html'; });
-
             if (btnToggleLanguage) {
                 btnToggleLanguage.addEventListener('click', () => {
-                    window.location.href = 'settings_factory_reset copy.html';
+                    window.location.href = 'settings_factory_reset.html';
                 });
             }
 
-            // Initial Setup
-            updateSelection(); // Default to "取消"
-            if(statusPrompt) statusPrompt.textContent = "恢复出厂设置";
-            // hintBar text is set by startAutoReturnTimer
+            updateSelection(); 
+            if(statusPrompt) statusPrompt.textContent = "Factory Reset"; // English
             startAutoReturnTimer(); 
         });
     </script>
-
 </body>
 </html>

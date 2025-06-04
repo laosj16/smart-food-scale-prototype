@@ -31,7 +31,7 @@
          p.subtitle { /* Added a class for the subtitle for specific styling */
             text-align: center;
             color: #4b5563; /* Slightly darker gray */
-            margin-bottom: 2.5rem; /* Increased margin */
+            margin-bottom: 1rem; /* Reduced margin before button */
             font-size: 0.9rem;
         }
         h2 {
@@ -91,8 +91,6 @@
          .tree ul li::after {
             left: 0.75rem;
         }
-
-
         .tree a {
             display: inline-block;
             padding: 0.5rem 1rem; /* Increased padding for better click area */
@@ -119,6 +117,21 @@
             font-size: 1rem;
             margin-bottom: 0.25rem;
         }
+        .language-toggle-button {
+            display: block;
+            margin: 1rem auto 2rem; /* Center button and add margin */
+            padding: 0.6rem 1.2rem;
+            background-color: #4f46e5; /* Indigo */
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .language-toggle-button:hover {
+            background-color: #4338ca; /* Darker Indigo */
+        }
     </style>
 </head>
 <body>
@@ -126,30 +139,32 @@
     <div class="page-container">
         <h1>智能食物秤 Pro - 交互原型</h1>
         <p class="subtitle">产品中心 - 胡中华</p>
+        
+        <button id="languageToggle" class="language-toggle-button" data-lang-zh="切换到英文" data-lang-en="Switch to Chinese">切换到英文</button>
 
         <h2>原型页面结构:</h2>
         <div style="display: flex; justify-content: space-between;">
             <ul class="tree" style="width: 48%;">
                 <li>
-                    <a href="main_menu.html">主菜单</a>
+                    <a href="main_menu.html" data-lang-zh="主菜单" data-lang-en="Main Menu">主菜单</a>
                     <ul>
-                        <li><a href="general_weighing.html">通用称重</a></li>
+                        <li><a href="general_weighing.html" data-lang-zh="通用称重" data-lang-en="General Weighing">通用称重</a></li>
                         <li>
-                            <a href="coffee_scale_menu.html">咖啡秤</a>
+                            <a href="coffee_scale_menu.html" data-lang-zh="咖啡秤" data-lang-en="Coffee Scale">咖啡秤</a>
                             <ul>
-                                <li><a href="coffee_pour_over.html">手冲模式 1</a></li>
-                                <li><a href="coffee_pour_over_2.html">手冲模式 2</a></li>
-                                <li><a href="coffee_espresso.html">意式模式 1</a></li>
+                                <li><a href="coffee_pour_over.html" data-lang-zh="手冲模式 1" data-lang-en="Pour Over Mode 1">手冲模式 1</a></li>
+                                <li><a href="coffee_pour_over_2.html" data-lang-zh="手冲模式 2" data-lang-en="Pour Over Mode 2">手冲模式 2</a></li>
+                                <li><a href="coffee_espresso.html" data-lang-zh="意式模式 1" data-lang-en="Espresso Mode 1">意式模式 1</a></li>
                             </ul>
                         </li>
-                        <li><a href="nutrition_scale_connect_app.html">营养秤连接App</a></li>
-                        <li><a href="nutrition_scale.html">营养秤</a></li>
-                        <li><a href="timed_weighing.html">倒计时</a></li>
+                        <li><a href="nutrition_scale_connect_app.html" data-lang-zh="营养秤连接App" data-lang-en="Nutrition Scale Connect App">营养秤连接App</a></li>
+                        <li><a href="nutrition_scale.html" data-lang-zh="营养秤" data-lang-en="Nutrition Scale">营养秤</a></li>
+                        <li><a href="timed_weighing.html" data-lang-zh="倒计时" data-lang-en="Timer">倒计时</a></li>
                         <li>
-                            <a href="settings_menu.html">设置</a>
+                            <a href="settings_menu.html" data-lang-zh="设置" data-lang-en="Settings">设置</a>
                             <ul>
-                                <li><a href="settings_factory_reset.html">恢复出厂设置</a></li>
-                                <li><a href="settings_about.html">关于设备</a></li>
+                                <li><a href="settings_factory_reset.html" data-lang-zh="恢复出厂设置" data-lang-en="Factory Reset">恢复出厂设置</a></li>
+                                <li><a href="settings_about.html" data-lang-zh="关于设备" data-lang-en="About Device">关于设备</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -158,14 +173,77 @@
             <ul class="tree" style="width: 48%;">
                 <li> <span class="category-title">电量与充电模拟:</span>
                     <ul>
-                        <li><a href="low_battery.html">低电量与关机</a></li>
-                        <li><a href="Power_off.html">返回与关机演示</a></li>
-                        <li><a href="charging_status.html">充电状态</a></li>
+                        <li><a href="low_battery.html" data-lang-zh="低电量与关机" data-lang-en="Low Battery & Shutdown">低电量与关机</a></li>
+                        <li><a href="Power_off.html" data-lang-zh="返回与关机演示" data-lang-en="Return & Shutdown Demo">返回与关机演示</a></li>
+                        <li><a href="charging_status.html" data-lang-zh="充电状态" data-lang-en="Charging Status">充电状态</a></li>
                     </ul>
                 </li>
             </ul>
         </div>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const languageToggle = document.getElementById('languageToggle');
+            let currentLanguage = 'zh'; // Default language
+
+            function setLanguage(lang) {
+                document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+                const elements = document.querySelectorAll('[data-lang-zh], [data-lang-en]');
+                elements.forEach(el => {
+                    const textKey = lang === 'zh' ? 'data-lang-zh' : 'data-lang-en';
+                    const text = el.getAttribute(textKey);
+                    if (text) {
+                        if (el.tagName === 'TITLE') {
+                            // Title is no longer translated based on previous user feedback
+                            // document.title = text; 
+                        } else {
+                            el.textContent = text;
+                        }
+                    }
+                });
+
+                // Update links
+                const links = document.querySelectorAll('a');
+                links.forEach(link => {
+                    let href = link.getAttribute('href');
+                    if (href && href.endsWith('.html')) {
+                        if (lang === 'en') {
+                            // Switch to English version (add " copy")
+                            if (!href.includes(' copy.html')) {
+                                link.setAttribute('href', href.replace('.html', ' copy.html'));
+                            }
+                        } else { // lang === 'zh'
+                            // Switch to Chinese version (remove " copy")
+                            if (href.includes(' copy.html')) {
+                                link.setAttribute('href', href.replace(' copy.html', '.html'));
+                            }
+                        }
+                    }
+                });
+
+                if (languageToggle) { // Check if button exists before updating its text
+                    if (lang === 'zh') {
+                        languageToggle.textContent = languageToggle.getAttribute('data-lang-zh'); // "切换到英文"
+                    } else {
+                        languageToggle.textContent = languageToggle.getAttribute('data-lang-en'); // "Switch to Chinese"
+                    }
+                }
+            }
+
+            if (languageToggle) {
+                languageToggle.addEventListener('click', function() {
+                    currentLanguage = currentLanguage === 'zh' ? 'en' : 'zh';
+                    setLanguage(currentLanguage);
+                });
+            } else {
+                // console.error('[Debug] Language toggle button not found, cannot add event listener.'); 
+                // Keeping this commented out or removing, as it's unlikely to be hit if the button is static HTML
+            }
+
+            // Initialize with default language
+            setLanguage(currentLanguage);
+        });
+    </script>
 </body>
 </html>
