@@ -22,7 +22,24 @@
         .unit-g { color: #60a5fa; } .unit-ml { color: #34d399; } .unit-oz { color: #fbbf24; } .unit-lb { color: #f87171; } .unit-lb-oz { color: #c084fc; }
         .tare-indicator { position: absolute; top: 20px; transform: translateY(-50%); left: 15px; background-color: #007AFF; color: white; padding: 3px 8px; border-radius: 5px; font-size: 14px; font-weight: bold; opacity: 0; transition: opacity 0.2s ease-out; z-index: 5; white-space: nowrap; }
         .tare-indicator.visible { opacity: 1; }
-        .hint-bar { text-align: center; padding: 0 10px; background-color: rgba(0, 0, 0, 0.3); font-size: 15px; color: #b0b0b0; flex-shrink: 0; height: 32px; display: flex; align-items: center; justify-content: center; white-space: normal; overflow: hidden; text-overflow: ellipsis; opacity: 1; line-height: normal; }
+        .hint-bar { 
+            text-align: center; 
+            padding: 8px 10px; /* Adjusted padding for potentially more height */
+            background-color: rgba(0, 0, 0, 0.3); 
+            font-size: 15px; 
+            color: #b0b0b0; 
+            flex-shrink: 0; 
+            min-height: 32px; /* Use min-height */
+            height: auto;     /* Allow height to grow */
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            white-space: normal; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            opacity: 1; 
+            line-height: 1.3; /* Adjusted line-height for better spacing if wrapped */
+        }
         .hint-bar.long-press-active { color: #ffffff; }
         @keyframes blink-text-animation { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
         .blink-text-inline { animation: blink-text-animation 1s infinite; font-weight: bold; }
