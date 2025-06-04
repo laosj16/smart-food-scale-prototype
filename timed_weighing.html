@@ -194,13 +194,9 @@
                  timerDisplay.classList.remove('timer-finished-red', 'timer-warning', 'paused');
                  timerInterval = setInterval(() => {
                      remainingSeconds--;
-                     // Add/remove warning class
-                     if (remainingSeconds <= 5 && remainingSeconds > 0) {
-                         timerDisplay.classList.add('timer-warning');
-                         timerDisplay.classList.remove('timer-finished-red');
-                     } else {
-                         timerDisplay.classList.remove('timer-warning');
-                     }
+                     // Warning class logic removed
+                     timerDisplay.classList.remove('timer-warning'); // Ensure warning is always removed if it was somehow added
+                     
                      // Update displayed time
                      const { minutes, seconds } = formatTime(remainingSeconds);
                      minutesDisplay.textContent = minutes;

@@ -106,6 +106,7 @@
         <button id="btn-rotate-right" class="control-button" title="模拟向右旋转">旋转 →</button>
         <button id="btn-short-press" class="control-button" title="模拟短按">TARE/停止</button>
         <button id="btn-long-press" class="control-button secondary" title="模拟长按旋钮">长按 (返回/关机)</button>
+        <button id="btn-toggle-language" class="control-button secondary" title="切换到英文版">Switch to English</button>
         <button id="btn-return-index" class="control-button secondary" title="返回目录页面">返回目录</button>
         <button id="btn-simulate-place" class="control-button" style="background-color: #10b981;">模拟放置</button>
         <button id="btn-simulate-remove" class="control-button" style="background-color: #f87171;">模拟拿走</button>
@@ -141,6 +142,7 @@
         const btnReturnIndex = document.getElementById('btn-return-index');
         const btnSimulatePlace = document.getElementById('btn-simulate-place');
         const btnSimulateRemove = document.getElementById('btn-simulate-remove');
+        const btnToggleLanguage = document.getElementById('btn-toggle-language');
 
         // State Variables
         const State = { INIT: 'INIT', WAITING_FILTER: 'WAITING_FILTER', FILTER_PLACED: 'FILTER_PLACED', WAITING_GROUNDS: 'WAITING_GROUNDS', WEIGHING_GROUNDS: 'WEIGHING_GROUNDS', READY_TO_POUR: 'READY_TO_POUR', POURING: 'POURING', FINISHED: 'FINISHED', WEIGHING_LIQUID: 'WEIGHING_LIQUID' };
@@ -284,7 +286,7 @@
         }
 
         function disableAllButtons() { 
-            [btnRotateLeft, btnRotateRight, btnShortPress, btnLongPress, btnReturnIndex, btnSimulatePlace, btnSimulateRemove].forEach(btn => { if(btn) btn.disabled = true; }); 
+            [btnRotateLeft, btnRotateRight, btnShortPress, btnLongPress, btnReturnIndex, btnSimulatePlace, btnSimulateRemove, btnToggleLanguage].forEach(btn => { if(btn) btn.disabled = true; }); 
         }
 
         function startLongPress() {
@@ -366,6 +368,12 @@
             if (weightToAdd > 0) { simulatePlacement(weightToAdd); }
         });
         btnSimulateRemove.addEventListener('click', simulateRemoval);
+
+        if (btnToggleLanguage) {
+            btnToggleLanguage.addEventListener('click', () => {
+                window.location.href = 'coffee_pour_over copy.html';
+            });
+        }
 
         // Initialization
         window.addEventListener('load', () => {
