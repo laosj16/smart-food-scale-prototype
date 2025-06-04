@@ -148,7 +148,7 @@
             let remainingSecondsForPowerOff;
             if (currentLongPressDuration < LONG_PRESS_POWER_OFF_DURATION) {
                 remainingSecondsForPowerOff = Math.ceil((LONG_PRESS_POWER_OFF_DURATION - currentLongPressDuration) / 1000);
-                if (hintBar) { hintBar.innerHTML = `Long press for <span class="blink-text-inline">${remainingSecondsForPowerOff}s</span> to power off, release now to return to previous menu`; } // English
+                if (hintBar) { hintBar.innerHTML = `Hold <span class="blink-text-inline">${remainingSecondsForPowerOff}s</span>: Power Off | Release: Prev. Menu`; } // Shorter English text
                 currentLongPressAction = currentLongPressDuration < LONG_PRESS_RETURN_DURATION ? LONG_PRESS_ACTION_NONE : LONG_PRESS_ACTION_RETURN;
             } else { 
                 if (longPressActive) { simulateDirectPowerOff(); } return; 
