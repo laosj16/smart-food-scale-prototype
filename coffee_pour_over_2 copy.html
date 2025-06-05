@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Base styles */
         body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding-bottom: 80px; }
         .device-screen { width: 100%; max-width: 480px; aspect-ratio: 4 / 3; background-color: #1a1a1a; color: #e0e0e0; border-radius: 0.5rem; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .status-bar { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background-color: rgba(0, 0, 0, 0.2); flex-shrink: 0; height: 36px; position: relative; }
@@ -64,14 +63,12 @@
     </style>
 </head>
 <body>
-
     <div class="device-screen">
         <div class="status-bar">
             <i class="fa-brands fa-bluetooth-b"></i>
             <span id="status-prompt"></span>
             <i class="fa-solid fa-battery-full"></i>
         </div>
-
         <div id="main-content" class="main-content">
             <div id="tare-indicator" class="tare-indicator">TARE</div>
             <div id="ratio-setting-display" class="ratio-setting-display">
@@ -88,7 +85,7 @@
                 <div class="info-item bg-total-water"> <span class="info-label" id="total-water-label">Total Water</span> <span class="info-value"> <span id="total-water-value">0.0</span> <span class="info-unit" id="total-water-unit">g</span> </span> </div>
                 <div class="info-item bg-time"> <span class="info-label">Time</span> <span id="timer-value" class="info-value">00:00</span> </div>
                 <div class="info-item bg-flow"> <span class="info-label" id="flow-rate-label">Flow Rate</span> <span class="info-value"> <span id="flow-rate-value">0.0</span> <span class="info-unit" id="flow-rate-unit">g/s</span> </span> </div>
-                <div class="info-item bg-grounds"> <span class="info-label" id="grounds-weight-label">Grounds</span> <span class="info-value"> <span id="grounds-weight-value">0.0</span> <span class="info-unit" id="grounds-weight-unit">g</span> </span> </div>
+                <div class="info-item bg-grounds"> <span class="info-label" id="grounds-weight-label">Grounds Wt.</span> <span class="info-value"> <span id="grounds-weight-value">0.0</span> <span class="info-unit" id="grounds-weight-unit">g</span> </span> </div>
             </div>
         </div>
         <div id="hint-bar" class="hint-bar"></div>
@@ -106,7 +103,6 @@
     </div>
 
     <script>
-        // --- DOM Elements ---
         let mainContent, statusPrompt, ratioSettingDisplay, ratioValueEditable,
             primaryDisplayContainer, primaryDisplay, primaryValue, primaryUnit,
             secondaryDisplay, totalWaterLabel, totalWaterValue, totalWaterUnit, timerValue,
@@ -117,7 +113,6 @@
             btnRotateLeft, btnRotateRight, btnShortPress, btnLongPress,
             btnReturnIndex, btnSimulatePlace, btnSimulateRemove, btnToggleLanguage;
         
-        // --- State Variables ---
         const State = { SETTING_RATIO: 'SETTING_RATIO', WAITING_GEAR_TARE: 'WAITING_GEAR_TARE', WAITING_GROUNDS: 'WAITING_GROUNDS', WEIGHING_GROUNDS: 'WEIGHING_GROUNDS', READY_TO_POUR: 'READY_TO_POUR', POURING: 'POURING', FINISHED: 'FINISHED', WEIGHING_LIQUID: 'WEIGHING_LIQUID' };
         let currentState = State.SETTING_RATIO;
         let targetRatio = 15; let currentWeight = 0.0; let gearWeight = 0.0;
@@ -126,24 +121,16 @@
         let timerInterval = null; let timerSeconds = 0; let pouringInterval = null;
         let lastWaterAddTime = 0; let lastWaterWeight = 0; let currentFlowRateGramsPerSecond = 0.0;
         let calculatedTargetWaterWeight = 0.0;
-
-        let longPressTimer = null; 
-        let longPressStartTime = 0;
-        let currentLongPressDuration = 0; 
-        let longPressActive = false; 
-        const LONG_PRESS_RETURN_DURATION = 1000; 
-        const LONG_PRESS_POWER_OFF_DURATION = 5000; 
-        const LONG_PRESS_ACTION_NONE = 0;
-        const LONG_PRESS_ACTION_RETURN = 1;
-        const LONG_PRESS_ACTION_POWER_OFF = 2;
+        let longPressTimer = null; let longPressStartTime = 0;
+        let currentLongPressDuration = 0; let longPressActive = false; 
+        const LONG_PRESS_RETURN_DURATION = 1000; const LONG_PRESS_POWER_OFF_DURATION = 5000; 
+        const LONG_PRESS_ACTION_NONE = 0; const LONG_PRESS_ACTION_RETURN = 1;
         let currentLongPressAction = LONG_PRESS_ACTION_NONE;
-
         const units = ['g', 'ml', 'fl:oz', 'oz', 'lb'];
         const unitColors = { 'g': 'unit-g', 'ml': 'unit-ml', 'fl:oz': 'unit-oz', 'oz': 'unit-oz', 'lb': 'unit-lb' };
         let currentUnitIndex = 0; let tareTimeout = null;
         const G_PER_ML = 1.0; const G_PER_OZ = 28.3495; const G_PER_LB = 453.592; const ML_PER_FL_OZ = 29.5735;
 
-        // --- Functions ---
         function formatTime(seconds) { const mins = Math.floor(seconds / 60); const secs = seconds % 60; return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`; }
         function startTimer() { if (timerInterval) return; timerSeconds = 0; lastWaterAddTime = Date.now(); lastWaterWeight = 0.0; currentFlowRateGramsPerSecond = 0.0; timerValue.textContent = formatTime(timerSeconds); timerInterval = setInterval(() => { timerSeconds++; if (timerSeconds >= 600) { stopTimer(); timerSeconds = 599; } timerValue.textContent = formatTime(timerSeconds); if (currentState === State.POURING && !pouringInterval) { calculateFlowRate(0); } }, 1000); }
         function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } if (pouringInterval) { clearInterval(pouringInterval); pouringInterval = null; } currentFlowRateGramsPerSecond = 0.0; }
@@ -161,29 +148,52 @@
             let showSecondary = false; let enableRotation = false; let shortPressEnabled = true; let centerContentVertically = true;
 
             switch (currentState) {
-                case State.SETTING_RATIO: showRatioSetting = true; enableRotation = true; centerContentVertically = true; promptText = "Set coffee to water ratio (1:X)"; hintTextVal = "Rotate to adjust, short press to confirm"; shortPressAction = 'Confirm Ratio'; break;
-                case State.WAITING_GEAR_TARE: showWeightPrimaryLarge = true; enableRotation = true; centerContentVertically = false; promptText = "Place carafe, filter & paper"; hintTextVal = "After placing, short press TARE"; shortPressAction = 'TARE'; break;
-                case State.WAITING_GROUNDS: showWeightPrimaryLarge = true; enableRotation = true; centerContentVertically = false; promptText = "OK, now add coffee grounds"; hintTextVal = "Waiting to add..."; shortPressAction = 'TARE'; break;
-                case State.WEIGHING_GROUNDS: showWeightPrimaryLarge = true; enableRotation = true; centerContentVertically = false; promptText = "OK, now add coffee grounds"; hintTextVal = "Rotate unit, short press TARE"; shortPressAction = 'TARE'; break;
-                case State.READY_TO_POUR: promptText = "Please start pouring..."; showWaterPrimary = true; showSecondary = true; enableRotation = false; centerContentVertically = true; shortPressAction = '---'; hintTextVal = "Waiting for water..."; break;
+                case State.SETTING_RATIO: 
+                    showRatioSetting = true; enableRotation = true; centerContentVertically = true; 
+                    promptText = "Set coffee-water ratio (1:X)"; 
+                    hintTextVal = "Rotate to adjust, short press to confirm"; 
+                    shortPressAction = 'Confirm Ratio'; // English
+                    break;
+                case State.WAITING_GEAR_TARE: 
+                    showWeightPrimaryLarge = true; enableRotation = true; centerContentVertically = false; 
+                    promptText = "Place carafe, filter & paper all at once"; 
+                    hintTextVal = "After placing, short press TARE to tare"; 
+                    shortPressAction = 'TARE'; 
+                    break;
+                case State.WAITING_GROUNDS: 
+                    showWeightPrimaryLarge = true; enableRotation = true; centerContentVertically = false; 
+                    promptText = "Waiting for placement...."; 
+                    hintTextVal = "OK, now add coffee grounds"; 
+                    shortPressAction = 'TARE'; 
+                    break;
+                case State.WEIGHING_GROUNDS: 
+                    showWeightPrimaryLarge = true; enableRotation = true; centerContentVertically = false; 
+                    promptText = "Waiting for tare...."; 
+                    hintTextVal = "Rotate to switch units, short press TARE to tare"; 
+                    shortPressAction = 'TARE'; 
+                    break;
+                case State.READY_TO_POUR: 
+                    promptText = "Waiting for pour..."; 
+                    hintTextVal = "Please start pouring..."; 
+                    showWaterPrimary = true; showSecondary = true; enableRotation = false; centerContentVertically = true; shortPressEnabled = false; shortPressAction = '---'; 
+                    break;
                 case State.POURING: 
                     promptText = "Pouring..."; 
                     shortPressAction = 'Stop'; 
-                    showWaterPrimary = true; 
-                    showSecondary = true; 
-                    enableRotation = false; 
-                    centerContentVertically = true; 
+                    showWaterPrimary = true; showSecondary = true; enableRotation = false; centerContentVertically = true; 
+                    // hintTextVal will be set below to include percentage
                     break;
                 case State.FINISHED: 
-                    promptText = "Brew complete"; 
-                    hintTextVal = "Short press to reset / Remove filter"; 
+                    promptText = "Please stop pouring..."; // As per user request
+                    hintTextVal = "Short press knob to reset / Or remove filter for liquid ratio"; 
                     shortPressAction = 'Reset'; 
-                    showWaterPrimary = true; 
-                    showSecondary = true; 
-                    enableRotation = false; 
-                    centerContentVertically = true; 
+                    showWaterPrimary = true; showSecondary = true; enableRotation = false; centerContentVertically = true; 
                     break;
-                case State.WEIGHING_LIQUID: showLiquidPrimary = true; showSecondary = true; enableRotation = false; centerContentVertically = true; promptText = "Calculating liquid weight..."; hintTextVal = "Short press TARE to reset"; shortPressAction = 'Reset'; break;
+                case State.WEIGHING_LIQUID: 
+                    promptText = "Calculating liquid weight..."; 
+                    hintTextVal = "Short press knob to reset"; 
+                    showLiquidPrimary = true; showSecondary = true; enableRotation = false; centerContentVertically = true; shortPressAction = 'Reset'; 
+                    break;
             }
             mainContent.classList.toggle('center-content', centerContentVertically); mainContent.classList.toggle('align-end', !centerContentVertically);
             ratioSettingDisplay.classList.toggle('hidden', !showRatioSetting); primaryDisplayContainer.classList.toggle('hidden', showRatioSetting);
@@ -231,12 +241,14 @@
                     if (calculatedTargetWaterWeight > 0.01) {
                         progressPercent = Math.min(100, (totalWaterWeight / calculatedTargetWaterWeight) * 100);
                     }
-                    hintTextVal = `Short press to stop timer (${progressPercent.toFixed(0)}%)`;
+                    hintTextVal = `Short press to stop timer (${progressPercent.toFixed(0)}%)`; // English
                 }
+                // For other states, hintTextVal is already set in the switch or will use the default from cancelLongPress
                 hintBar.textContent = hintTextVal;
             }
 
-            btnShortPress.textContent = `${shortPressAction === '---' ? '---' : shortPressAction} (短按)`; btnShortPress.disabled = !shortPressEnabled;
+            btnShortPress.textContent = `${shortPressAction === '---' ? '---' : shortPressAction} (短按)`; // Keep button text Chinese
+            btnShortPress.disabled = !shortPressEnabled;
             btnRotateLeft.disabled = !enableRotation; btnRotateRight.disabled = !enableRotation;
             btnSimulatePlace.disabled = currentState === State.SETTING_RATIO || currentState === State.FINISHED || currentState === State.WEIGHING_LIQUID;
             btnSimulateRemove.disabled = currentState !== State.FINISHED;
@@ -314,11 +326,8 @@
         function updateLongPressHintText() { currentLongPressDuration = Date.now() - longPressStartTime; let remainingSecondsForPowerOff; if (currentLongPressDuration < LONG_PRESS_POWER_OFF_DURATION) { remainingSecondsForPowerOff = Math.ceil((LONG_PRESS_POWER_OFF_DURATION - currentLongPressDuration) / 1000); if (hintBar) { hintBar.innerHTML = `Long press for <span class="blink-text-inline">${remainingSecondsForPowerOff}s</span> to power off, release now to return to previous menu`; } currentLongPressAction = (currentLongPressDuration < LONG_PRESS_RETURN_DURATION) ? LONG_PRESS_ACTION_NONE : LONG_PRESS_ACTION_RETURN; } else { if (longPressActive) { simulateDirectPowerOff(); } return; } }
         function cancelLongPress() {
             if (!longPressActive) return; longPressActive = false; if (longPressTimer) { cancelAnimationFrame(longPressTimer); longPressTimer = null; }
-            if (hintBar) {
-                hintBar.classList.remove('long-press-active');
-            }
-            updateUI(); 
-
+            if (hintBar) { hintBar.classList.remove('long-press-active'); }
+            updateUI(); // Call updateUI to restore normal hint and status texts
             if (currentLongPressAction === LONG_PRESS_ACTION_RETURN) { console.log("Executing Back Action..."); window.location.href = 'coffee_scale_menu copy.html'; } 
             else if (currentLongPressAction === LONG_PRESS_ACTION_NONE) { console.log("Long press cancelled (too short)."); }
             currentLongPressDuration = 0; currentLongPressAction = LONG_PRESS_ACTION_NONE;
@@ -382,14 +391,37 @@
                 if (longPressActive) return; 
                 simulateRemoval();
             });
+
             if (btnToggleLanguage) {
                 btnToggleLanguage.addEventListener('click', () => {
                     window.location.href = 'coffee_pour_over_2.html';
                 });
             }
+
             setState(State.SETTING_RATIO); 
             if(ratioValueEditable) ratioValueEditable.textContent = targetRatio;
         });
     </script>
 </body>
 </html>
+<environment_details>
+# VSCode Visible Files
+coffee_pour_over_2 copy.html
+
+# VSCode Open Tabs
+timed_weighing.html
+timed_weighing copy.html
+coffee_pour_over_2.html
+Power_off copy.html
+coffee_pour_over.html
+coffee_pour_over copy.html
+
+# Current Time
+2025/6/5 上午8:33:12 (Asia/Shanghai, UTC+8:00)
+
+# Context Window Usage
+722,157 / 1,048.576K tokens used (69%)
+
+# Current Mode
+ACT MODE
+</environment_details>
