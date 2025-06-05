@@ -124,7 +124,6 @@
 
     <div class="interaction-controls">
         <button id="btn-toggle-charger" class="control-button success">模拟连接充电器</button>
-        <button id="btn-toggle-language" class="control-button secondary" title="切换到英文版">Switch to English</button>
         <button id="btn-return-index" class="control-button secondary">返回目录</button>
     </div>
 
@@ -144,7 +143,7 @@
 
         const btnToggleCharger = document.getElementById('btn-toggle-charger');
         const btnReturnIndex = document.getElementById('btn-return-index');
-        const btnToggleLanguage = document.getElementById('btn-toggle-language');
+        // btnToggleLanguage removed
 
         // --- State Variables ---
         let isCharging = false;
@@ -328,11 +327,7 @@
             });
         }
 
-        if (btnToggleLanguage) {
-            btnToggleLanguage.addEventListener('click', () => {
-                window.location.href = 'charging_status copy.html';
-            });
-        }
+        // btnToggleLanguage event listener removed
 
         // --- Initial Setup ---
         updateWeighingDisplay(); // Show the initial weighing screen

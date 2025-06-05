@@ -111,7 +111,6 @@
     <div class="interaction-controls">
         <button id="btn-simulate-low" class="control-button warning">模拟电量 < 10%</button>
         <button id="btn-simulate-empty" class="control-button danger">模拟电量 0%</button>
-        <button id="btn-toggle-language" class="control-button secondary" title="切换到英文版">Switch to English</button>
         <button id="btn-return-index" class="control-button secondary">返回目录</button>
     </div>
 
@@ -132,7 +131,7 @@
         const btnSimulateLow = document.getElementById('btn-simulate-low');
         const btnSimulateEmpty = document.getElementById('btn-simulate-empty');
         const btnReturnIndex = document.getElementById('btn-return-index');
-        const btnToggleLanguage = document.getElementById('btn-toggle-language');
+        // btnToggleLanguage removed
         // const btnReturnEmpty = document.getElementById('btn-return-empty'); // Removed
 
         let isShuttingDown = false;
@@ -281,11 +280,7 @@
             });
         }
 
-        if (btnToggleLanguage) {
-            btnToggleLanguage.addEventListener('click', () => {
-                window.location.href = 'low_battery copy.html';
-            });
-        }
+        // btnToggleLanguage event listener removed
 
         // --- Initial Setup ---
         updateWeighingDisplay();

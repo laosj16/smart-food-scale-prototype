@@ -118,7 +118,6 @@
         <button id="btn-rotate-right" class="control-button" title="模拟向右旋转">旋转 →</button>
         <button id="btn-short-press" class="control-button" title="模拟短按">确认</button>
         <button id="btn-long-press" class="control-button secondary" title="模拟长按旋钮">长按 (返回/关机)</button>
-        <button id="btn-toggle-language" class="control-button secondary" title="切换到英文版">Switch to English</button>
         <button id="btn-return-index" class="control-button secondary" title="返回目录页面">返回目录</button>
     </div>
 
@@ -156,7 +155,7 @@
             const btnShortPress = document.getElementById('btn-short-press');
             const btnLongPress = document.getElementById('btn-long-press');
             const btnReturnIndex = document.getElementById('btn-return-index');
-            const btnToggleLanguage = document.getElementById('btn-toggle-language');
+            // btnToggleLanguage removed
 
             // --- Function Definitions ---
             function formatTime(totalSeconds) {
@@ -327,7 +326,7 @@
             function updatePowerConfirmSelection() { if(confirmCancelBtn && confirmPowerOffBtn){ confirmCancelBtn.classList.toggle('selected', powerConfirmSelection === 'cancel'); confirmPowerOffBtn.classList.toggle('selected', powerConfirmSelection === 'power-off');} }
             function resetPowerConfirmTimeout() { if (powerConfirmTimeout) clearTimeout(powerConfirmTimeout); powerConfirmTimeout = setTimeout(() => { console.log("Power confirm timed out."); hidePowerConfirm(); }, POWER_CONFIRM_TIMEOUT_DURATION); }
             function simulatePowerOff() { console.log("Simulating Power Off..."); if(powerOffConfirmOverlay) powerOffConfirmOverlay.innerHTML = '<p class="text-2xl">关机...</p>'; disableAllButtons(); }
-            function disableAllButtons() { [btnRotateLeft, btnRotateRight, btnShortPress, btnLongPress, btnReturnIndex, btnToggleLanguage].forEach(btn => {if(btn) btn.disabled = true;}); }
+            function disableAllButtons() { [btnRotateLeft, btnRotateRight, btnShortPress, btnLongPress, btnReturnIndex].forEach(btn => {if(btn) btn.disabled = true;}); } // Removed btnToggleLanguage
             function setProgress(percent) { if(!progressCircle) return; const offset = circumference - percent / 100 * circumference; progressCircle.style.strokeDashoffset = offset; }
             // Standard 1-5s Back, 5s+ Power Confirm Logic
             function startLongPress() {
@@ -391,11 +390,7 @@
             }
             if(btnReturnIndex) btnReturnIndex.addEventListener('click', () => { window.location.href = 'index.html'; });
 
-            if (btnToggleLanguage) {
-                btnToggleLanguage.addEventListener('click', () => {
-                    window.location.href = 'timed_weighing copy.html';
-                });
-            }
+            // btnToggleLanguage event listener removed
 
             // --- Initial Setup ---
             setState(State.SETTING_MINUTES); // Start in setting minutes state

@@ -98,7 +98,6 @@
         <button id="btn-rotate-right" class="control-button" title="模拟向右旋转">旋转 →</button>
         <button id="btn-short-press" class="control-button" title="模拟短按">确认食物</button>
         <button id="btn-long-press" class="control-button secondary" title="模拟长按旋钮">长按 (返回/关机)</button>
-        <button id="btn-toggle-language" class="control-button secondary" title="切换到英文版">Switch to English</button>
         <button id="btn-return-index" class="control-button secondary" title="返回目录页面">返回目录</button>
         <button id="btn-add-weight" class="control-button" style="background-color: #10b981;">模拟加重</button>
         <button id="btn-reset-weight" class="control-button" style="background-color: #f87171;">模拟清零</button>
@@ -174,7 +173,7 @@
             const btnReturnIndex = document.getElementById('btn-return-index');
             const btnAddWeight = document.getElementById('btn-add-weight');
             const btnResetWeight = document.getElementById('btn-reset-weight');
-            const btnToggleLanguage = document.getElementById('btn-toggle-language');
+            // btnToggleLanguage removed
 
             function showTareIndicator() {
                  if(!tareIndicator) return;
@@ -343,11 +342,7 @@
             if(btnAddWeight) btnAddWeight.addEventListener('click', simulateAddWeight);
             if(btnResetWeight) btnResetWeight.addEventListener('click', resetScale);
 
-            if (btnToggleLanguage) {
-                btnToggleLanguage.addEventListener('click', () => {
-                    window.location.href = 'nutrition_scale copy.html';
-                });
-            }
+            // btnToggleLanguage event listener removed
 
             generateFoodGrid();
             updateUI(); 

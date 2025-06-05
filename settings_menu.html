@@ -228,7 +228,6 @@
         <button id="btn-rotate-right" class="control-button" title="模拟向右旋转">旋转 →</button>
         <button id="btn-short-press" class="control-button" title="模拟短按确认">确认 (短按)</button>
         <button id="btn-long-press" class="control-button secondary" title="模拟长按旋钮">长按 (返回/关机)</button>
-        <button id="btn-toggle-language" class="control-button secondary" title="切换到英文版">Switch to English</button>
         <button id="btn-return-index" class="control-button secondary" title="返回目录页面">返回目录</button>
     </div>
 
@@ -252,7 +251,7 @@
             const btnLongPress = document.getElementById('btn-long-press');
             const btnReturnIndex = document.getElementById('btn-return-index');
             const statusPrompt = document.getElementById('status-prompt');
-            const btnToggleLanguage = document.getElementById('btn-toggle-language');
+            // btnToggleLanguage removed
 
             // --- State Variables ---
             let selectedIndex = 0;
@@ -364,7 +363,7 @@
             function updatePowerConfirmSelection() { if(confirmCancelBtn && confirmPowerOffBtn){ confirmCancelBtn.classList.toggle('selected', powerConfirmSelection === 'cancel'); confirmPowerOffBtn.classList.toggle('selected', powerConfirmSelection === 'power-off');} }
             function resetPowerConfirmTimeout() { if (powerConfirmTimeout) clearTimeout(powerConfirmTimeout); powerConfirmTimeout = setTimeout(() => { console.log("Power confirm timed out."); hidePowerConfirm(); }, POWER_CONFIRM_TIMEOUT_DURATION); }
             function simulatePowerOff() { console.log("Simulating Power Off..."); if(powerOffConfirmOverlay) powerOffConfirmOverlay.innerHTML = '<p class="text-2xl">关机...</p>'; disableAllButtons(); }
-            function disableAllButtons() { [btnRotateLeft, btnRotateRight, btnShortPress, btnLongPress, btnReturnIndex, btnToggleLanguage].forEach(btn => {if(btn) btn.disabled = true;}); }
+            function disableAllButtons() { [btnRotateLeft, btnRotateRight, btnShortPress, btnLongPress, btnReturnIndex].forEach(btn => {if(btn) btn.disabled = true;}); } // Removed btnToggleLanguage
             function setProgress(percent) { if(!progressCircle) return; const offset = circumference - percent / 100 * circumference; progressCircle.style.strokeDashoffset = offset; }
             function startLongPress() { if (longPressActive || isPowerConfirmActive || !longPressOverlay) return; longPressActive = true; longPressThresholdMet = false; longPressStartTime = Date.now(); currentLongPressDuration = 0; longPressOverlay.classList.remove('visible'); setProgress(0); const updateProgress = () => { if (!longPressActive) return; const elapsedTime = Date.now() - longPressStartTime; currentLongPressDuration = elapsedTime; if (!longPressThresholdMet && elapsedTime >= SHOW_OVERLAY_DURATION) { longPressThresholdMet = true; if(progressCircle) progressCircle.setAttribute('stroke', LONG_PRESS_COLOR_BACK); if(longPressActionText) longPressActionText.innerHTML = `此时<span class="blink-text">松开按钮</span>，<strong class="font-bold">返回上一级菜单</strong>`; if(longPressOverlay) longPressOverlay.classList.add('visible'); } if (longPressThresholdMet) { const progressPercent = Math.min(100, (elapsedTime / POWER_CONFIRM_DURATION) * 100); setProgress(progressPercent); const remainingSeconds = Math.ceil((POWER_CONFIRM_DURATION - elapsedTime) / 1000); if(progressText) progressText.textContent = remainingSeconds > 0 ? remainingSeconds : '0'; if (elapsedTime >= POWER_CONFIRM_DURATION) { cancelAnimationFrame(longPressTimer); longPressTimer = null; longPressActive = false; if(longPressOverlay) longPressOverlay.classList.remove('visible'); showPowerConfirm(); return; } } if (longPressActive) { longPressTimer = requestAnimationFrame(updateProgress); } }; longPressTimer = requestAnimationFrame(updateProgress); }
             function cancelLongPress() { if (!longPressActive) return; longPressActive = false; if (longPressTimer) { cancelAnimationFrame(longPressTimer); longPressTimer = null; } if (longPressThresholdMet && longPressOverlay) { longPressOverlay.classList.remove('visible'); } if (currentLongPressDuration >= SHOW_OVERLAY_DURATION && currentLongPressDuration < POWER_CONFIRM_DURATION) { console.log("Executing Back Action (to Main Menu)..."); window.location.href = 'main_menu.html'; } else if (currentLongPressDuration < SHOW_OVERLAY_DURATION) { console.log("Long press cancelled (too short)."); } currentLongPressDuration = 0; longPressThresholdMet = false; }
@@ -381,11 +380,7 @@
             }
             if(btnReturnIndex) btnReturnIndex.addEventListener('click', () => { window.location.href = 'index.html'; });
 
-            if (btnToggleLanguage) {
-                btnToggleLanguage.addEventListener('click', () => {
-                    window.location.href = 'settings_menu copy.html';
-                });
-            }
+            // btnToggleLanguage event listener removed
 
             // --- Initial Setup ---
             updateSelection(); // Initial highlight

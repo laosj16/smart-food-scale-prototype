@@ -35,29 +35,19 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px; /* Increased padding for better centering of the message */
+            padding: 20px;
             text-align: center;
         }
         .connect-prompt-icon {
-            font-size: 48px; /* Larger icon */
-            color: #888; /* Default icon color */
+            font-size: 48px;
+            color: #888;
             margin-bottom: 20px;
             transition: color 0.3s ease;
         }
-        .connect-prompt-icon.syncing {
-            animation: fa-spin 1.5s infinite linear; /* Ensure FontAwesome spin animation is applied if not default */
-        }
-        .connect-prompt-icon.success {
-            color: #22c55e; /* Green for success */
-        }
-        .connect-prompt-icon.warning {
-            color: #facc15; /* Yellow for warning/initial prompt */
-        }
-        .connect-prompt-text {
-            font-size: 18px; /* Larger text */
-            color: #c0c0c0;
-            line-height: 1.6;
-        }
+        .connect-prompt-icon.syncing { animation: fa-spin 1.5s infinite linear; }
+        .connect-prompt-icon.success { color: #22c55e; }
+        .connect-prompt-icon.warning { color: #facc15; }
+        .connect-prompt-text { font-size: 18px; color: #c0c0c0; line-height: 1.6; }
         .hint-bar { text-align: center; padding: 8px 10px 12px 10px; background-color: rgba(0, 0, 0, 0.3); font-size: 15px; color: #b0b0b0; flex-shrink: 0; height: 36px; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .interaction-controls { position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(240, 240, 240, 0.95); backdrop-filter: blur(5px); padding: 0.75rem 1rem; border-top: 1px solid #ccc; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0.5rem; z-index: 100; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); }
         .control-button { padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 500; background-color: #4f46e5; color: white; border: none; border-radius: 0.375rem; cursor: pointer; transition: background-color 0.2s ease, transform 0.1s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
@@ -92,18 +82,17 @@
         <button id="btn-simulate-syncing-foods" class="control-button">模拟:同步食物中</button>
         <button id="btn-simulate-sync-complete" class="control-button">模拟:同步完成</button>
         <button id="btn-long-press" class="control-button secondary" title="模拟长按旋钮 (返回主菜单)">长按 (返回)</button>
-        <button id="btn-toggle-language" class="control-button secondary" title="切换到英文版">Switch to English</button>
         <button id="btn-return-index" class="control-button secondary" title="返回目录页面">返回目录</button>
     </div>
 
     <script>
         // States
-        const STATE_CONNECT_APP_PROMPT = 'STATE_CONNECT_APP_PROMPT'; // 1. 未连接App状态
-        const STATE_APP_CONNECTED_WAITING_SYNC = 'STATE_APP_CONNECTED_WAITING_SYNC'; // 2. 已连接App状态 (等待同步)
-        const STATE_SYNCING_IN_PROGRESS = 'STATE_SYNCING_IN_PROGRESS'; // 3. 同步食物中
-        const STATE_SYNC_COMPLETED_REDIRECTING = 'STATE_SYNC_COMPLETED_REDIRECTING'; // 4. 同步完成
+        const STATE_CONNECT_APP_PROMPT = 'STATE_CONNECT_APP_PROMPT'; 
+        const STATE_APP_CONNECTED_WAITING_SYNC = 'STATE_APP_CONNECTED_WAITING_SYNC'; 
+        const STATE_SYNCING_IN_PROGRESS = 'STATE_SYNCING_IN_PROGRESS'; 
+        const STATE_SYNC_COMPLETED_REDIRECTING = 'STATE_SYNC_COMPLETED_REDIRECTING'; 
 
-        let currentScreenState = STATE_CONNECT_APP_PROMPT; // Initial state as per feedback
+        let currentScreenState = STATE_CONNECT_APP_PROMPT; 
 
         document.addEventListener('DOMContentLoaded', () => {
             const bluetoothStatusIcon = document.getElementById('bluetooth-status-icon');
@@ -115,44 +104,38 @@
             const btnLongPress = document.getElementById('btn-long-press');
             const btnReturnIndex = document.getElementById('btn-return-index');
 
-            // Updated simulation button IDs
             const btnSimulateConnectApp = document.getElementById('btn-simulate-connect-app');
             const btnSimulateAppConnected = document.getElementById('btn-simulate-app-connected');
             const btnSimulateSyncingFoods = document.getElementById('btn-simulate-syncing-foods');
             const btnSimulateSyncComplete = document.getElementById('btn-simulate-sync-complete');
-            const btnToggleLanguage = document.getElementById('btn-toggle-language');
 
             function updateScreenState(newState) {
                 currentScreenState = newState;
-
                 mainPromptIcon.className = 'connect-prompt-icon'; 
                 bluetoothStatusIcon.classList.remove('blinking');
 
                 switch (currentScreenState) {
-                    case STATE_CONNECT_APP_PROMPT: // 1. 未连接App状态
+                    case STATE_CONNECT_APP_PROMPT:
                         statusPrompt.textContent = "请连接App";
                         bluetoothStatusIcon.classList.add('blinking');
                         mainPromptIcon.classList.add('fas', 'fa-cloud-arrow-down', 'warning');
                         mainPromptText.innerHTML = "首次使用营养秤功能<br>请先连接Unique Health App";
                         hintBar.textContent = "等待App连接...";
                         break;
-                    case STATE_APP_CONNECTED_WAITING_SYNC: // 2. 已连接App状态 (等待同步)
+                    case STATE_APP_CONNECTED_WAITING_SYNC:
                         statusPrompt.textContent = "App已连接";
-                        // Bluetooth icon solid (default, no blinking class)
-                        mainPromptIcon.classList.add('fas', 'fa-hourglass-half', 'warning'); //沙漏图标
+                        mainPromptIcon.classList.add('fas', 'fa-hourglass-half', 'warning');
                         mainPromptText.innerHTML = "App已连接<br>请在App选择常用食物以便同步...";
                         hintBar.textContent = "请在App端操作";
                         break;
-                    case STATE_SYNCING_IN_PROGRESS: // 3. 同步食物中
+                    case STATE_SYNCING_IN_PROGRESS:
                         statusPrompt.textContent = "同步中";
-                        // Bluetooth icon solid
                         mainPromptIcon.classList.add('fas', 'fa-sync', 'syncing'); 
                         mainPromptText.innerHTML = "食物数据同步中<br>请稍候...";
                         hintBar.textContent = "同步进行中";
                         break;
-                    case STATE_SYNC_COMPLETED_REDIRECTING: // 4. 同步完成
+                    case STATE_SYNC_COMPLETED_REDIRECTING:
                         statusPrompt.textContent = "同步成功";
-                        // Bluetooth icon solid
                         mainPromptIcon.classList.add('fas', 'fa-check-circle', 'success');
                         mainPromptText.innerHTML = "食物数据同步完成!<br>正在跳转至营养秤...";
                         hintBar.textContent = "即将跳转";
@@ -166,7 +149,7 @@
             if (btnLongPress) {
                 btnLongPress.addEventListener('click', () => {
                     console.log("Simulating long press: Returning to main menu.");
-                    window.location.href = 'index.html';
+                    window.location.href = 'main_menu.html'; // Corrected to main_menu.html
                 });
             }
             if (btnReturnIndex) {
@@ -175,20 +158,12 @@
                 });
             }
 
-            // Simulation button listeners with updated IDs
             if(btnSimulateConnectApp) btnSimulateConnectApp.addEventListener('click', () => updateScreenState(STATE_CONNECT_APP_PROMPT));
             if(btnSimulateAppConnected) btnSimulateAppConnected.addEventListener('click', () => updateScreenState(STATE_APP_CONNECTED_WAITING_SYNC));
             if(btnSimulateSyncingFoods) btnSimulateSyncingFoods.addEventListener('click', () => updateScreenState(STATE_SYNCING_IN_PROGRESS));
             if(btnSimulateSyncComplete) btnSimulateSyncComplete.addEventListener('click', () => updateScreenState(STATE_SYNC_COMPLETED_REDIRECTING));
 
-            if (btnToggleLanguage) {
-                btnToggleLanguage.addEventListener('click', () => {
-                    window.location.href = 'nutrition_scale_connect_app copy.html';
-                });
-            }
-
-            // Initial setup
-            updateScreenState(STATE_CONNECT_APP_PROMPT); // Set initial state as per feedback
+            updateScreenState(STATE_CONNECT_APP_PROMPT);
         });
     </script>
 </body>

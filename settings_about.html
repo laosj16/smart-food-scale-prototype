@@ -83,7 +83,6 @@
         <button id="btn-rotate-right" class="control-button" title="模拟向右旋转" disabled>旋转 →</button>
         <button id="btn-short-press" class="control-button" title="模拟短按确认" disabled>确认 (短按)</button>
         <button id="btn-long-press" class="control-button secondary" title="模拟长按旋钮">长按 (返回)</button>
-        <button id="btn-toggle-language" class="control-button secondary" title="切换到英文版">Switch to English</button>
         <button id="btn-return-index" class="control-button secondary" title="返回目录页面">返回目录</button>
     </div>
 
@@ -95,7 +94,7 @@
             
             const btnLongPress = document.getElementById('btn-long-press');
             const btnReturnIndex = document.getElementById('btn-return-index');
-            const btnToggleLanguage = document.getElementById('btn-toggle-language');
+            // btnToggleLanguage removed
 
             let longPressTimer = null;
             let longPressActive = false;
@@ -128,11 +127,7 @@
             }
             if(btnReturnIndex) btnReturnIndex.addEventListener('click', () => { window.location.href = 'index.html'; });
 
-            if (btnToggleLanguage) {
-                btnToggleLanguage.addEventListener('click', () => {
-                    window.location.href = 'settings_about copy.html';
-                });
-            }
+            // btnToggleLanguage event listener removed
 
             // Initial Setup
             if(statusPrompt) statusPrompt.textContent = "关于设备";

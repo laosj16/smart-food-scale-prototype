@@ -122,7 +122,6 @@
         <button id="btn-rotate-right" class="control-button" title="模拟向右旋转">旋转 →</button>
         <button id="btn-short-press" class="control-button" title="模拟短按">确认比例</button>
         <button id="btn-long-press" class="control-button secondary" title="模拟长按旋钮">长按 (返回/关机)</button>
-        <button id="btn-toggle-language" class="control-button secondary" title="切换到英文版">Switch to English</button>
         <button id="btn-return-index" class="control-button secondary" title="返回目录页面">返回目录</button>
         <button id="btn-simulate-place" class="control-button" style="background-color: #10b981;" disabled>模拟放置</button>
         <button id="btn-simulate-remove" class="control-button" style="background-color: #f87171;" disabled>模拟拿走</button>
@@ -138,7 +137,8 @@
             hintBar, tareIndicator,
             totalWaterInfoItem, timeInfoItem, flowRateInfoItem, groundsWeightInfoItem,
             btnRotateLeft, btnRotateRight, btnShortPress, btnLongPress,
-            btnReturnIndex, btnSimulatePlace, btnSimulateRemove, btnToggleLanguage;
+            btnReturnIndex, btnSimulatePlace, btnSimulateRemove;
+            // btnToggleLanguage removed
         
         // --- State Variables ---
         const State = { SETTING_RATIO: 'SETTING_RATIO', WAITING_GEAR_TARE: 'WAITING_GEAR_TARE', WAITING_GROUNDS: 'WAITING_GROUNDS', WEIGHING_GROUNDS: 'WEIGHING_GROUNDS', READY_TO_POUR: 'READY_TO_POUR', POURING: 'POURING', FINISHED: 'FINISHED', WEIGHING_LIQUID: 'WEIGHING_LIQUID' };
@@ -335,7 +335,7 @@
 
         // --- New Long Press Logic ---
         function simulateDirectPowerOff() { console.log("Simulating Direct Power Off - Black Screen"); disableAllButtons(); const deviceScreen = document.querySelector('.device-screen'); if (deviceScreen) { deviceScreen.innerHTML = ''; deviceScreen.style.backgroundColor = '#000000'; } if (longPressActive && longPressTimer) { cancelAnimationFrame(longPressTimer); longPressTimer = null; longPressActive = false; } }
-        function disableAllButtons() { [btnRotateLeft, btnRotateRight, btnShortPress, btnLongPress, btnReturnIndex, btnSimulatePlace, btnSimulateRemove, btnToggleLanguage].forEach(btn => { if(btn) btn.disabled = true; }); }
+        function disableAllButtons() { [btnRotateLeft, btnRotateRight, btnShortPress, btnLongPress, btnReturnIndex, btnSimulatePlace, btnSimulateRemove].forEach(btn => { if(btn) btn.disabled = true; }); } // Removed btnToggleLanguage
         function startLongPress() { if (longPressActive) return; longPressActive = true; longPressStartTime = Date.now(); currentLongPressDuration = 0; currentLongPressAction = LONG_PRESS_ACTION_NONE; if (hintBar) { hintBar.classList.add('long-press-active'); } updateLongPressHintText(); longPressTimer = requestAnimationFrame(updateLongPressHintLoop); }
         function updateLongPressHintLoop() { if (!longPressActive) return; updateLongPressHintText(); longPressTimer = requestAnimationFrame(updateLongPressHintLoop); }
         function updateLongPressHintText() { currentLongPressDuration = Date.now() - longPressStartTime; let remainingSecondsForPowerOff; if (currentLongPressDuration < LONG_PRESS_POWER_OFF_DURATION) { remainingSecondsForPowerOff = Math.ceil((LONG_PRESS_POWER_OFF_DURATION - currentLongPressDuration) / 1000); if (hintBar) { hintBar.innerHTML = `长按<span class="blink-text-inline">${remainingSecondsForPowerOff}s</span>后将关机，现在松开旋钮返回上一级菜单`; } currentLongPressAction = (currentLongPressDuration < LONG_PRESS_RETURN_DURATION) ? LONG_PRESS_ACTION_NONE : LONG_PRESS_ACTION_RETURN; } else { if (longPressActive) { simulateDirectPowerOff(); } return; } }
@@ -389,7 +389,7 @@
             btnReturnIndex = document.getElementById('btn-return-index');
             btnSimulatePlace = document.getElementById('btn-simulate-place');
             btnSimulateRemove = document.getElementById('btn-simulate-remove');
-            btnToggleLanguage = document.getElementById('btn-toggle-language');
+            // btnToggleLanguage removed
 
             btnRotateLeft.addEventListener('click', () => handleRotate(-1));
             btnRotateRight.addEventListener('click', () => handleRotate(1));
@@ -414,11 +414,7 @@
                 simulateRemoval();
             });
 
-            if (btnToggleLanguage) {
-                btnToggleLanguage.addEventListener('click', () => {
-                    window.location.href = 'coffee_pour_over_2 copy.html';
-                });
-            }
+            // btnToggleLanguage event listener removed
 
             setState(State.SETTING_RATIO); 
             if(ratioValueEditable) ratioValueEditable.textContent = targetRatio;

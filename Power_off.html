@@ -156,7 +156,6 @@
 
     <div class="interaction-controls">
         <button id="btn-long-press" class="control-button secondary" title="模拟长按旋钮">长按 (返回/关机)</button>
-        <button id="btn-toggle-language" class="control-button secondary" title="切换到英文版">Switch to English</button>
         <button id="btn-return-index" class="control-button secondary" title="返回目录页面">返回目录</button>
     </div>
 
@@ -172,7 +171,7 @@
         // Interaction Buttons
         const btnLongPress = document.getElementById('btn-long-press');
         const btnReturnIndex = document.getElementById('btn-return-index');
-        const btnToggleLanguage = document.getElementById('btn-toggle-language');
+        // btnToggleLanguage removed
 
         // --- State Variables ---
         let currentWeight = 168.8;
@@ -287,7 +286,7 @@
         }
 
         function disableAllButtons() {
-              [btnLongPress, btnReturnIndex, btnToggleLanguage].forEach(btn => { 
+              [btnLongPress, btnReturnIndex].forEach(btn => { // Removed btnToggleLanguage
                 if(btn) btn.disabled = true;
               });
         }
@@ -377,11 +376,7 @@
         btnLongPress.addEventListener('mouseup', cancelLongPress);
         btnLongPress.addEventListener('mouseleave', cancelLongPress); 
 
-        if (btnToggleLanguage) {
-            btnToggleLanguage.addEventListener('click', () => {
-                window.location.href = 'Power_off copy.html';
-            });
-        }
+        // btnToggleLanguage event listener removed
 
         // --- Initialization ---
         window.addEventListener('load', () => {
