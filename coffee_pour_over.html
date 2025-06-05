@@ -262,7 +262,7 @@
                     break; 
                 case State.FILTER_PLACED: 
                     promptText = "等待去皮...."; 
-                    hintTextVal = "通过旋转切换单位, 短按TARE去皮"; 
+                    hintTextVal = "左右旋转切换单位 , 短按\"TARE\"去皮"; 
                     shortPressAction = 'TARE'; 
                     break; 
                 case State.WAITING_GROUNDS: 
@@ -272,7 +272,7 @@
                     break; 
                 case State.WEIGHING_GROUNDS: 
                     promptText = "等待去皮...."; 
-                    hintTextVal = "通过旋转切换单位, 短按TARE去皮"; 
+                    hintTextVal = "左右旋转切换单位 , 短按\"TARE\"去皮"; 
                     shortPressAction = 'TARE'; 
                     break; 
                 case State.READY_TO_POUR: 
@@ -381,7 +381,7 @@
                 }
                 hintBar.textContent = hintTextVal;
             }
-            if (statusPrompt) statusPrompt.textContent = "手冲模式"; 
+            if (statusPrompt) statusPrompt.textContent = "手冲模式1"; 
 
             if (currentLongPressAction === LONG_PRESS_ACTION_RETURN) { 
                 console.log("Executing Back Action (松开时触发 <5s)...");
@@ -421,7 +421,7 @@
             setState(State.INIT); 
             if (hintBar) { 
             }
-            if (statusPrompt) statusPrompt.textContent = "手冲模式"; 
+            if (statusPrompt) statusPrompt.textContent = "手冲模式1"; 
         });
     </script>
 

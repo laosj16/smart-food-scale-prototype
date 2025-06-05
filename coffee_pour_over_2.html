@@ -141,9 +141,22 @@
             // btnToggleLanguage removed
         
         // --- State Variables ---
-        const State = { SETTING_RATIO: 'SETTING_RATIO', WAITING_GEAR_TARE: 'WAITING_GEAR_TARE', WAITING_GROUNDS: 'WAITING_GROUNDS', WEIGHING_GROUNDS: 'WEIGHING_GROUNDS', READY_TO_POUR: 'READY_TO_POUR', POURING: 'POURING', FINISHED: 'FINISHED', WEIGHING_LIQUID: 'WEIGHING_LIQUID' };
+        const State = { 
+            SETTING_RATIO: 'SETTING_RATIO', 
+            WAITING_CARAFE: 'WAITING_CARAFE',  // 等待放置量杯状态
+            WAITING_GEAR_TARE: 'WAITING_GEAR_TARE', 
+            WAITING_GROUNDS: 'WAITING_GROUNDS', 
+            WEIGHING_GROUNDS: 'WEIGHING_GROUNDS', 
+            READY_TO_POUR: 'READY_TO_POUR', 
+            POURING: 'POURING', 
+            FINISHED: 'FINISHED', 
+            WEIGHING_LIQUID: 'WEIGHING_LIQUID' 
+        };
         let currentState = State.SETTING_RATIO;
-        let targetRatio = 15; let currentWeight = 0.0; let gearWeight = 0.0;
+        let targetRatio = 15; 
+        let currentWeight = 0.0; 
+        let carafeWeight = 0.0;  // 新增量杯重量变量
+        let gearWeight = 0.0;
         let coffeeGroundsWeight = 15.7; let measuredGroundsWeight = 0.0;
         let totalWaterWeight = 0.0; let coffeeLiquidWeight = 0.0; let removedWeight = 0.0;
         let timerInterval = null; let timerSeconds = 0; let pouringInterval = null;
@@ -180,13 +193,44 @@
 
         function updateUI() {
             if (!mainContent || !statusPrompt || !ratioSettingDisplay || !primaryDisplayContainer || !hintBar) { console.error("DOM elements not ready for updateUI"); return; }
-            const currentUnit = units[currentUnitIndex]; let promptText = ''; let hintTextVal = ''; let shortPressAction = '';
-            let showRatioSetting = false; let showWeightPrimaryLarge = false; let showWaterPrimary = false; let showLiquidPrimary = false;
-            let showSecondary = false; let enableRotation = false; let shortPressEnabled = true; let centerContentVertically = true;
+            const currentUnit = units[currentUnitIndex]; 
+            let promptText = ''; 
+            let hintTextVal = ''; 
+            let shortPressAction = '';
+            let showRatioSetting = false; 
+            let showWeightPrimaryLarge = false; 
+            let showWaterPrimary = false; 
+            let showLiquidPrimary = false;
+            let showSecondary = false; 
+            let enableRotation = false; 
+            let shortPressEnabled = true; 
+            let centerContentVertically = true;
 
             switch (currentState) {
-                case State.SETTING_RATIO: showRatioSetting = true; enableRotation = true; centerContentVertically = true; promptText = "请设置粉和水的比例 (1:X)"; hintTextVal = "旋转调整, 短按确认"; shortPressAction = '确认比例'; break;
-                case State.WAITING_GEAR_TARE: showWeightPrimaryLarge = true; enableRotation = true; centerContentVertically = false; promptText = "请放置量杯、滤杯和滤纸"; hintTextVal = "放置后, 短按TARE去皮"; shortPressAction = 'TARE'; break;
+                case State.SETTING_RATIO: 
+                    showRatioSetting = true; 
+                    enableRotation = true; 
+                    centerContentVertically = true; 
+                    promptText = "请设置粉和水的比例"; 
+                    hintTextVal = "旋转调整, 短按确认"; 
+                    shortPressAction = '确认比例'; 
+                    break;
+                case State.WAITING_CARAFE: 
+                    showWeightPrimaryLarge = true; 
+                    enableRotation = true; 
+                    centerContentVertically = false; 
+                    promptText = "等待放置...."; 
+                    hintTextVal = "请放上咖啡量杯壶"; 
+                    shortPressAction = 'TARE'; 
+                    break;
+                case State.WAITING_GEAR_TARE: 
+                    showWeightPrimaryLarge = true; 
+                    enableRotation = true; 
+                    centerContentVertically = false; 
+                    promptText = "等待放置...."; 
+                    hintTextVal = "请放上滤杯与滤纸"; 
+                    shortPressAction = 'TARE'; 
+                    break;
                 case State.WAITING_GROUNDS: showWeightPrimaryLarge = true; enableRotation = true; centerContentVertically = false; promptText = "好的，现在请加入咖啡粉"; hintTextVal = "等待加入..."; shortPressAction = 'TARE'; break;
                 case State.WEIGHING_GROUNDS: showWeightPrimaryLarge = true; enableRotation = true; centerContentVertically = false; promptText = "好的，现在请加入咖啡粉"; hintTextVal = "旋转切换单位, 短按TARE去皮"; shortPressAction = 'TARE'; break;
                 case State.READY_TO_POUR: promptText = "请开始注水..."; showWaterPrimary = true; showSecondary = true; enableRotation = false; centerContentVertically = true; shortPressAction = '---'; hintTextVal = "等待注水..."; break; // Added hintTextVal for READY_TO_POUR
@@ -274,8 +318,26 @@
             if (currentState === State.SETTING_RATIO) return; 
             currentWeight += weight; 
             switch (currentState) { 
-                case State.WAITING_GEAR_TARE: break; 
-                case State.WAITING_GROUNDS: if (currentWeight > 0.5) { measuredGroundsWeight = currentWeight; console.log(`Grounds added: ${measuredGroundsWeight.toFixed(1)}g. Waiting manual tare.`); setState(State.WEIGHING_GROUNDS); } break; 
+                case State.WAITING_CARAFE: 
+                    if (currentWeight > 10) {
+                        carafeWeight = currentWeight;
+                        console.log(`Carafe detected (${carafeWeight.toFixed(1)}g), auto-taring.`);
+                        setTimeout(() => {
+                            showTareIndicator();
+                            currentWeight = 0.0;
+                            setState(State.WAITING_GEAR_TARE);
+                        }, 500);
+                    }
+                    break;
+                case State.WAITING_GEAR_TARE: 
+                    break; 
+                case State.WAITING_GROUNDS: 
+                    if (currentWeight > 0.5) { 
+                        measuredGroundsWeight = currentWeight; 
+                        console.log(`Grounds added: ${measuredGroundsWeight.toFixed(1)}g. Waiting manual tare.`); 
+                        setState(State.WEIGHING_GROUNDS); 
+                    } 
+                    break; 
                 case State.READY_TO_POUR: if (weight > 0.1) { console.log("Water detected, starting timer and pour..."); startTimer(); startPourSimulation(); setState(State.POURING); } break; 
                 case State.POURING: console.log("Adding more water during pour..."); startPourSimulation(true); break; 
             } 
@@ -320,8 +382,15 @@
             if (longPressActive) return; 
             console.log(`Short press in state: ${currentState}`); 
             switch (currentState) { 
-                case State.SETTING_RATIO: setState(State.WAITING_GEAR_TARE); break; 
-                case State.WAITING_GEAR_TARE: showTareIndicator(); gearWeight = currentWeight; currentWeight = 0.0; setState(State.WAITING_GROUNDS); break; 
+                case State.SETTING_RATIO: 
+                    setState(State.WAITING_CARAFE); 
+                    break; 
+                case State.WAITING_GEAR_TARE: 
+                    showTareIndicator(); 
+                    gearWeight = currentWeight; 
+                    currentWeight = 0.0; 
+                    setState(State.WAITING_GROUNDS); 
+                    break; 
                 case State.WEIGHING_GROUNDS: showTareIndicator(); coffeeGroundsWeight = measuredGroundsWeight > 0.1 ? measuredGroundsWeight : coffeeGroundsWeight; currentWeight = 0.0; totalWaterWeight = 0.0; setState(State.READY_TO_POUR); break; 
                 case State.POURING: stopTimer(); stopPourSimulation(); setState(State.FINISHED); break; 
                 case State.WEIGHING_LIQUID: case State.FINISHED: resetScale(); break; 
@@ -402,7 +471,8 @@
             btnSimulatePlace.addEventListener('click', () => {
                 if (longPressActive) return; 
                 let weightToAdd = 0;
-                if (currentState === State.WAITING_GEAR_TARE) weightToAdd = 170.2 + 303.3; 
+                if (currentState === State.WAITING_CARAFE) weightToAdd = 170.2;
+                else if (currentState === State.WAITING_GEAR_TARE) weightToAdd = 303.3; 
                 else if (currentState === State.WAITING_GROUNDS) weightToAdd = 15.7; 
                 else if (currentState === State.READY_TO_POUR) weightToAdd = 0.5; 
                 else if (currentState === State.POURING) { startPourSimulation(true); return; }
