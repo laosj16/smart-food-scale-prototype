@@ -395,8 +395,10 @@
 
             switch (currentState) {
                 case State.WAITING_CUP:
-                    promptText = "请放置咖啡杯"; hintText = "等待放置...";
-                    showWeightPrimary = true; enableRotation = true;
+                    promptText = "等待放置..."; 
+                    hintText = "请放置咖啡杯";
+                    showWeightPrimary = true; 
+                    enableRotation = true;
                     break;
                 case State.CUP_PLACED_TARED:
                     promptText = "等待萃取..."; hintText = "旋转切换单位";
