@@ -227,32 +227,67 @@
                     showWeightPrimaryLarge = true; 
                     enableRotation = true; 
                     centerContentVertically = false; 
-                    promptText = "等待放置...."; 
-                    hintTextVal = "请放上滤杯与滤纸"; 
+                    if (currentWeight > 10) {
+                        promptText = "等待去皮...."; 
+                        hintTextVal = "左右旋转切换单位, 短按TARE去皮"; 
+                    } else {
+                        promptText = "等待放置...."; 
+                        hintTextVal = "请放上滤杯与滤纸"; 
+                    }
                     shortPressAction = 'TARE'; 
                     break;
-                case State.WAITING_GROUNDS: showWeightPrimaryLarge = true; enableRotation = true; centerContentVertically = false; promptText = "好的，现在请加入咖啡粉"; hintTextVal = "等待加入..."; shortPressAction = 'TARE'; break;
-                case State.WEIGHING_GROUNDS: showWeightPrimaryLarge = true; enableRotation = true; centerContentVertically = false; promptText = "好的，现在请加入咖啡粉"; hintTextVal = "旋转切换单位, 短按TARE去皮"; shortPressAction = 'TARE'; break;
-                case State.READY_TO_POUR: promptText = "请开始注水..."; showWaterPrimary = true; showSecondary = true; enableRotation = false; centerContentVertically = true; shortPressAction = '---'; hintTextVal = "等待注水..."; break; // Added hintTextVal for READY_TO_POUR
+                case State.WAITING_GROUNDS: 
+                    showWeightPrimaryLarge = true; 
+                    enableRotation = true; 
+                    centerContentVertically = false; 
+                    promptText = "等待放置...."; 
+                    hintTextVal = "接下来，请加入咖啡粉"; 
+                    shortPressAction = 'TARE'; 
+                    break;
+                case State.WEIGHING_GROUNDS: 
+                    showWeightPrimaryLarge = true; 
+                    enableRotation = true; 
+                    centerContentVertically = false; 
+                    promptText = "等待去皮...."; 
+                    hintTextVal = "左右旋转切换单位, 短按TARE去皮"; 
+                    shortPressAction = 'TARE'; 
+                    break;
+                case State.READY_TO_POUR: 
+                    promptText = "等待注水..."; 
+                    showWaterPrimary = true; 
+                    showSecondary = true; 
+                    enableRotation = false; 
+                    centerContentVertically = true; 
+                    shortPressAction = '---'; 
+                    hintTextVal = "准备就绪，可以开始注水"; 
+                    break;
                 case State.POURING: 
-                    promptText = "请开始注水..."; // Or "注水中..."
+                    promptText = "注水中..."; 
                     shortPressAction = '停止'; 
                     showWaterPrimary = true; 
                     showSecondary = true; 
                     enableRotation = false; 
                     centerContentVertically = true; 
-                    // hintTextVal will be set below to include percentage
+                    hintTextVal = "短按旋钮停止计时"; 
                     break;
                 case State.FINISHED: 
                     promptText = "冲煮完成"; 
-                    hintTextVal = "短按复位 / 拿走滤杯"; 
+                    hintTextVal = "短按旋钮复位 / 也可拿走滤杯显示粉液比"; 
                     shortPressAction = '复位'; 
                     showWaterPrimary = true; 
                     showSecondary = true; 
                     enableRotation = false; 
                     centerContentVertically = true; 
                     break;
-                case State.WEIGHING_LIQUID: showLiquidPrimary = true; showSecondary = true; enableRotation = false; centerContentVertically = true; promptText = "计算液重..."; hintTextVal = "短按 TARE 复位"; shortPressAction = '复位'; break;
+                case State.WEIGHING_LIQUID: 
+                    showLiquidPrimary = true; 
+                    showSecondary = true; 
+                    enableRotation = false; 
+                    centerContentVertically = true; 
+                    promptText = "计算液重"; 
+                    hintTextVal = "短按 TARE 复位"; 
+                    shortPressAction = '复位'; 
+                    break;
             }
             mainContent.classList.toggle('center-content', centerContentVertically); mainContent.classList.toggle('align-end', !centerContentVertically);
             ratioSettingDisplay.classList.toggle('hidden', !showRatioSetting); primaryDisplayContainer.classList.toggle('hidden', showRatioSetting);
@@ -300,7 +335,7 @@
                     if (calculatedTargetWaterWeight > 0.01) {
                         progressPercent = Math.min(100, (totalWaterWeight / calculatedTargetWaterWeight) * 100);
                     }
-                    hintTextVal = `短按停止计时 (${progressPercent.toFixed(0)}%)`;
+                    hintTextVal = `短按旋钮停止计时 (${progressPercent.toFixed(0)}%)`;
                 }
                 // For other states, hintTextVal is already set in the switch or will use the default from cancelLongPress
                 hintBar.textContent = hintTextVal;
@@ -330,6 +365,10 @@
                     }
                     break;
                 case State.WAITING_GEAR_TARE: 
+                    if (currentWeight > 10) {
+                        console.log(`Gear detected (${currentWeight.toFixed(1)}g), waiting for tare.`);
+                        updateUI();
+                    }
                     break; 
                 case State.WAITING_GROUNDS: 
                     if (currentWeight > 0.5) { 
@@ -386,10 +425,12 @@
                     setState(State.WAITING_CARAFE); 
                     break; 
                 case State.WAITING_GEAR_TARE: 
-                    showTareIndicator(); 
-                    gearWeight = currentWeight; 
-                    currentWeight = 0.0; 
-                    setState(State.WAITING_GROUNDS); 
+                    if (currentWeight > 10) {
+                        showTareIndicator(); 
+                        gearWeight = currentWeight; 
+                        currentWeight = 0.0; 
+                        setState(State.WAITING_GROUNDS); 
+                    }
                     break; 
                 case State.WEIGHING_GROUNDS: showTareIndicator(); coffeeGroundsWeight = measuredGroundsWeight > 0.1 ? measuredGroundsWeight : coffeeGroundsWeight; currentWeight = 0.0; totalWaterWeight = 0.0; setState(State.READY_TO_POUR); break; 
                 case State.POURING: stopTimer(); stopPourSimulation(); setState(State.FINISHED); break; 
