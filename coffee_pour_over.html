@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>等待放置.... - 智能食物秤 Pro</title> <script src="https://cdn.tailwindcss.com"></script>
+    <title>手冲模式 1 - 智能食物秤 Pro</title> <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -144,7 +144,7 @@
         // btnToggleLanguage removed
 
         // State Variables
-        const State = { INIT: 'INIT', WAITING_FILTER: 'WAITING_FILTER', FILTER_PLACED: 'FILTER_PLACED', WAITING_GROUNDS: 'WAITING_GROUNDS', WEIGHING_GROUNDS: 'WEIGHING_GROUNDS', READY_TO_POUR: 'READY_TO_POUR', POURING: 'POURING', FINISHED: 'FINISHED', WEIGHING_LIQUID: 'WEIGHING_LIQUID' };
+        const State = { INIT: 'INIT', WAITING_FILTER: 'WAITING_FILTER', FILTER_PLACED: 'FILTER_PLACED', WAITING_GROUNDS: 'WAITING_GROUNDS', WEIGHING_GROUNDS: 'WEIGHING_GROUNDS', READY_TO_POUR: 'READY_TO_POUR', POURING: 'POURING', FINISHED: 'FINISHED', WEIGHING_LIQUID: 'WEIGHING_LIQUID', WAITING_CARAFE: 'WAITING_CARAFE' };
         let currentState = State.INIT;
         let currentWeight = 0.0; let carafeWeight = 0.0; let filterAndPaperWeight = 303.3;
         let coffeeGroundsWeight = 15.7; let measuredFilterWeight = 0.0; let measuredGroundsWeight = 0.0;
@@ -183,7 +183,23 @@
 
         function updateUI() {
             const currentUnit = units[currentUnitIndex]; let promptText = ''; let hintTextVal = ''; let shortPressAction = ''; let showWeightPrimaryLarge = false; let showWaterPrimary = false; let showLiquidPrimary = false; let showSecondary = false; let enableRotation = false; let shortPressEnabled = true; let useInlineLayout = false;
-            switch (currentState) { case State.INIT: case State.WAITING_FILTER: case State.FILTER_PLACED: case State.WAITING_GROUNDS: case State.WEIGHING_GROUNDS: showWeightPrimaryLarge = true; enableRotation = true; break; case State.READY_TO_POUR: case State.POURING: case State.FINISHED: showWaterPrimary = true; showSecondary = true; enableRotation = false; useInlineLayout = true; shortPressEnabled = (currentState !== State.READY_TO_POUR); break; case State.WEIGHING_LIQUID: showLiquidPrimary = true; showSecondary = true; enableRotation = false; useInlineLayout = true; break; }
+            switch (currentState) { 
+                case State.INIT: 
+                case State.WAITING_CARAFE:
+                    showWeightPrimaryLarge = true; 
+                    enableRotation = true; 
+                    promptText = "等待放置..."; 
+                    hintTextVal = "请放上咖啡量杯壶"; 
+                    shortPressAction = 'TARE'; 
+                    break;
+                case State.WAITING_FILTER: 
+                case State.FILTER_PLACED: 
+                case State.WAITING_GROUNDS: 
+                case State.WEIGHING_GROUNDS: 
+                    showWeightPrimaryLarge = true; 
+                    enableRotation = true; 
+                    break;
+                case State.READY_TO_POUR: case State.POURING: case State.FINISHED: showWaterPrimary = true; showSecondary = true; enableRotation = false; useInlineLayout = true; shortPressEnabled = (currentState !== State.READY_TO_POUR); break; case State.WEIGHING_LIQUID: showLiquidPrimary = true; showSecondary = true; enableRotation = false; useInlineLayout = true; break; }
             primaryDisplay.classList.toggle('inline-layout', useInlineLayout); primaryUnit.style.display = 'inline-block'; 
             if (showWeightPrimaryLarge) { const formatted = formatWeight(currentWeight); primaryValue.textContent = formatted.value; primaryUnit.textContent = formatted.unit; primaryUnit.className = 'primary-unit'; if (unitColors[formatted.unit]) { primaryUnit.classList.add(unitColors[formatted.unit]); } primaryValue.style.fontSize = '100px'; primaryUnit.style.display = 'block'; primaryUnit.style.marginTop = '8px'; } else if (showWaterPrimary) { const formatted = formatWeight(totalWaterWeight); primaryValue.textContent = formatted.value; primaryUnit.textContent = formatted.unit; primaryUnit.className = 'primary-unit'; if (unitColors[formatted.unit]) { primaryUnit.classList.add(unitColors[formatted.unit]); } primaryValue.style.fontSize = '72px'; primaryUnit.style.marginTop = '0'; } else if (showLiquidPrimary) { const formatted = formatWeight(coffeeLiquidWeight); primaryValue.textContent = formatted.value; primaryUnit.textContent = formatted.unit; primaryUnit.className = 'primary-unit'; if (unitColors[formatted.unit]) { primaryUnit.classList.add(unitColors[formatted.unit]); } primaryValue.style.fontSize = '72px'; primaryUnit.style.marginTop = '0'; }
             secondaryDisplay.classList.toggle('hidden', !showSecondary); primaryDisplayContainer.classList.toggle('with-secondary', showSecondary); document.querySelector('.main-content').classList.toggle('with-secondary', showSecondary);
@@ -295,6 +311,14 @@
                     hintTextVal = "短按 TARE 复位"; 
                     shortPressAction = '复位'; 
                     break; 
+                case State.WAITING_CARAFE: 
+                    showWeightPrimaryLarge = true; 
+                    enableRotation = true; 
+                    centerContentVertically = false; 
+                    promptText = "等待放置...."; 
+                    hintTextVal = "请放上咖啡量杯壶"; 
+                    shortPressAction = 'TARE'; 
+                    break; 
             }
             statusPrompt.textContent = promptText; 
             if (!longPressActive && hintBar) hintBar.textContent = hintTextVal; 
@@ -377,11 +401,12 @@
                     case State.POURING: hintTextVal = "短按停止计时"; break;
                     case State.FINISHED: hintTextVal = "短按复位 / 拿走滤杯"; break;
                     case State.WEIGHING_LIQUID: hintTextVal = "短按 TARE 复位"; break;
+                    case State.WAITING_CARAFE: hintTextVal = "请放上咖啡量杯壶"; break;
                     default: hintTextVal = "手冲咖啡模式"; 
                 }
                 hintBar.textContent = hintTextVal;
             }
-            if (statusPrompt) statusPrompt.textContent = "手冲模式1"; 
+            updateUI();
 
             if (currentLongPressAction === LONG_PRESS_ACTION_RETURN) { 
                 console.log("Executing Back Action (松开时触发 <5s)...");
@@ -421,7 +446,7 @@
             setState(State.INIT); 
             if (hintBar) { 
             }
-            if (statusPrompt) statusPrompt.textContent = "手冲模式1"; 
+            if (statusPrompt) statusPrompt.textContent = "等待放置..."; 
         });
     </script>
 
