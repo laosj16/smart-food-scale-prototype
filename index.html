@@ -140,8 +140,6 @@
         <h1>智能食物秤 Pro - 交互原型</h1>
         <p class="subtitle">产品中心 - 胡中华</p>
         
-        <button id="languageToggle" class="language-toggle-button" data-lang-zh="切换到英文" data-lang-en="Switch to Chinese">切换到英文</button>
-
         <h2>原型页面结构:</h2>
         <div style="display: flex; justify-content: space-between;">
             <ul class="tree" style="width: 48%;">
@@ -183,66 +181,31 @@
     </div>
 
     <script>
+        // Language toggle functionality removed.
+        // Links and text will remain as defined in the HTML (Chinese).
         document.addEventListener('DOMContentLoaded', () => {
-            const languageToggle = document.getElementById('languageToggle');
-            let currentLanguage = 'zh'; // Default language
-
-            function setLanguage(lang) {
-                document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
-                const elements = document.querySelectorAll('[data-lang-zh], [data-lang-en]');
-                elements.forEach(el => {
-                    const textKey = lang === 'zh' ? 'data-lang-zh' : 'data-lang-en';
-                    const text = el.getAttribute(textKey);
-                    if (text) {
-                        if (el.tagName === 'TITLE') {
-                            // Title is no longer translated based on previous user feedback
-                            // document.title = text; 
-                        } else {
-                            el.textContent = text;
-                        }
-                    }
-                });
-
-                // Update links
-                const links = document.querySelectorAll('a');
-                links.forEach(link => {
-                    let href = link.getAttribute('href');
-                    if (href && href.endsWith('.html')) {
-                        if (lang === 'en') {
-                            // Switch to English version (add " copy")
-                            if (!href.includes(' copy.html')) {
-                                link.setAttribute('href', href.replace('.html', ' copy.html'));
-                            }
-                        } else { // lang === 'zh'
-                            // Switch to Chinese version (remove " copy")
-                            if (href.includes(' copy.html')) {
-                                link.setAttribute('href', href.replace(' copy.html', '.html'));
-                            }
-                        }
-                    }
-                });
-
-                if (languageToggle) { // Check if button exists before updating its text
-                    if (lang === 'zh') {
-                        languageToggle.textContent = languageToggle.getAttribute('data-lang-zh'); // "切换到英文"
-                    } else {
-                        languageToggle.textContent = languageToggle.getAttribute('data-lang-en'); // "Switch to Chinese"
-                    }
+            // Ensure all links point to .html and not copy.html
+            const links = document.querySelectorAll('a');
+            links.forEach(link => {
+                let href = link.getAttribute('href');
+                if (href && href.includes(' copy.html')) {
+                    link.setAttribute('href', href.replace(' copy.html', '.html'));
                 }
+                // Ensure text content is from data-lang-zh if it exists
+                const zhText = link.getAttribute('data-lang-zh');
+                if (zhText) {
+                    link.textContent = zhText;
+                }
+            });
+            // Ensure title is Chinese if it was ever changed by lang toggle
+            const titleElement = document.querySelector('title');
+            if (titleElement) {
+                // Assuming the original title is "智能食物秤 Pro - 交互原型"
+                // Or, if there was a data-lang-zh on title, use that.
+                // For simplicity, let's hardcode it if it's static.
+                // If the title tag itself had data-lang-zh, that would be better.
+                // Based on current HTML, the title is static and already Chinese.
             }
-
-            if (languageToggle) {
-                languageToggle.addEventListener('click', function() {
-                    currentLanguage = currentLanguage === 'zh' ? 'en' : 'zh';
-                    setLanguage(currentLanguage);
-                });
-            } else {
-                // console.error('[Debug] Language toggle button not found, cannot add event listener.'); 
-                // Keeping this commented out or removing, as it's unlikely to be hit if the button is static HTML
-            }
-
-            // Initialize with default language
-            setLanguage(currentLanguage);
         });
     </script>
 </body>

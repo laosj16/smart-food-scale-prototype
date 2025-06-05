@@ -345,22 +345,9 @@
             longPressActive = false; if (longPressTimer) { cancelAnimationFrame(longPressTimer); longPressTimer = null; }
             if (hintBar) {
                 hintBar.classList.remove('long-press-active');
-                let hintTextVal = '';
-                switch (currentState) {
-                    case State.INIT: hintTextVal = "Waiting for placement..."; break;
-                    case State.WAITING_FILTER: hintTextVal = "Waiting for placement..."; break;
-                    case State.FILTER_PLACED: hintTextVal = "Rotate to switch units, short press TARE to tare"; break;
-                    case State.WAITING_GROUNDS: hintTextVal = "Waiting to add..."; break;
-                    case State.WEIGHING_GROUNDS: hintTextVal = "Rotate to switch units, short press TARE to tare"; break;
-                    case State.READY_TO_POUR: hintTextVal = "Waiting for water..."; break;
-                    case State.POURING: hintTextVal = "Short press to stop timer"; break;
-                    case State.FINISHED: hintTextVal = "Short press to reset / Remove filter"; break;
-                    case State.WEIGHING_LIQUID: hintTextVal = "Short press TARE to reset"; break;
-                    default: hintTextVal = "Pour Over Mode"; 
-                }
-                hintBar.textContent = hintTextVal;
+                // updateUI will set the correct hint text based on current state
             }
-            if (statusPrompt) statusPrompt.textContent = "Pour Over Mode"; // English
+            updateUI(); // Call updateUI to restore normal hint and status texts
 
             if (currentLongPressAction === LONG_PRESS_ACTION_RETURN) { 
                 console.log("Executing Back Action (release <5s)...");
@@ -403,9 +390,30 @@
             if (hintBar) { 
                 // Initial hint text set by updateUI via setState
             }
-            if (statusPrompt) statusPrompt.textContent = "Pour Over Mode"; // English
+            if (statusPrompt) statusPrompt.textContent = "Pour Over Mode 1"; // English
         });
     </script>
 
 </body>
 </html>
+<environment_details>
+# VSCode Visible Files
+coffee_pour_over copy.html
+
+# VSCode Open Tabs
+timed_weighing.html
+timed_weighing copy.html
+coffee_pour_over_2.html
+Power_off copy.html
+coffee_pour_over.html
+coffee_pour_over copy.html
+
+# Current Time
+2025/6/5 上午8:33:12 (Asia/Shanghai, UTC+8:00)
+
+# Context Window Usage
+722,157 / 1,048.576K tokens used (69%)
+
+# Current Mode
+ACT MODE
+</environment_details>
