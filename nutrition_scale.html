@@ -233,7 +233,7 @@
                     if (weightValue) weightValue.textContent = formattedWeight.value;
                     if (weightUnit) { weightUnit.textContent = formattedWeight.unit; weightUnit.className = 'weight-unit'; if (unitColors[formattedWeight.unit]) { weightUnit.classList.add(unitColors[formattedWeight.unit]); }}
                     populateNutrientDisplays();
-                    hintTextVal = isWeighing ? "旋转滚动查看, 短按去皮" : "旋转切换单位, 放置食物称重";
+                    hintTextVal = isWeighing ? "旋转来向下滚动查看, 短按去皮" : "请放置食物称重,左右旋转切换单位";
                     shortPressAction = 'TARE';
                 } else {
                     promptText = "选择食物";
@@ -325,7 +325,7 @@
                     hintBar.classList.remove('long-press-active');
                     // Restore original hint text based on current UI state
                     const isWeighing = currentWeight > 0.05;
-                    if (isFoodConfirmed) { hintBar.textContent = isWeighing ? "旋转滚动查看, 短按去皮" : "旋转切换单位, 放置食物称重"; } 
+                    if (isFoodConfirmed) { hintBar.textContent = isWeighing ? "旋转来向下滚动查看, 短按去皮" : "请放置食物称重,左右旋转切换单位"; } 
                     else { hintBar.textContent = "旋转选择食物, 短按确认"; }
                 }
                 if (currentLongPressAction === LONG_PRESS_ACTION_RETURN) { window.location.href = 'main_menu.html'; } 

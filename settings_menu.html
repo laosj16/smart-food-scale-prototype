@@ -196,14 +196,15 @@
                         <div class="toggle-knob"></div>
                     </div>
                 </li>
+                <li class="settings-item" data-target="settings_language.html">
+                    <i class="fa-solid fa-language"></i> <span>语言设置</span>
+                    <span id="current-language" style="margin-left: auto; color: #a0a0a0;">中文简体</span>
+                </li>
                 <li class="settings-item" data-target="settings_factory_reset.html">
                      <i class="fa-solid fa-arrows-rotate"></i> <span>恢复出厂设置</span>
                 </li>
                  <li class="settings-item" data-target="settings_about.html">
                      <i class="fa-solid fa-circle-info"></i> <span>关于设备</span>
-                </li>
-                 <li class="settings-item" data-target="main_menu.html">
-                     <i class="fa-solid fa-arrow-left"></i> <span>返回</span>
                 </li>
             </ul>
         </div>
@@ -262,6 +263,11 @@
             let isPowerConfirmActive = false; let powerConfirmSelection = 'cancel'; let powerConfirmTimeout = null;
             const radius = 42; const circumference = radius * 2 * Math.PI;
 
+            // --- Language Control State ---
+            const languages = ['中文简体', '中文繁體', 'English', '한국어', '日本語'];
+            let currentLanguageIndex = 0;
+            const currentLanguageElement = document.getElementById('current-language');
+
             // --- Brightness Control State ---
             let currentBrightnessLevel = 3; // 1=20%, 2=40%, 3=60%, 4=80%, 5=100%. Default to 3 (60%).
             const TOTAL_BRIGHTNESS_LEVELS = 5;
@@ -289,6 +295,11 @@
                 console.log(`Sound is now: ${isSoundOn ? 'ON' : 'OFF'}`);
             }
 
+            function updateLanguageVisual() {
+                if (!currentLanguageElement) return;
+                currentLanguageElement.textContent = languages[currentLanguageIndex];
+                console.log(`Language set to: ${languages[currentLanguageIndex]}`);
+            }
 
             function updateSelection() {
                 settingsItems.forEach((item, index) => {
@@ -316,10 +327,9 @@
                  if (selectedItemElement.id === 'brightness-control-item') {
                      currentBrightnessLevel++;
                      if (currentBrightnessLevel > TOTAL_BRIGHTNESS_LEVELS) {
-                         currentBrightnessLevel = 1; // Wrap around to the lowest level (20%)
+                         currentBrightnessLevel = 1;
                      }
                      updateBrightnessVisual();
-                     // Optionally provide feedback in hint bar or status prompt
                      if(statusPrompt) {
                         const brightnessPercentage = currentBrightnessLevel * (100 / TOTAL_BRIGHTNESS_LEVELS);
                         statusPrompt.textContent = `亮度: ${brightnessPercentage}%`;
@@ -330,7 +340,7 @@
                         }, 1500);
                      }
                  } else if (selectedItemElement.id === 'sound-control-item') {
-                    isSoundOn = !isSoundOn; // Toggle the sound state
+                    isSoundOn = !isSoundOn;
                     updateSoundToggleVisual();
                     if(statusPrompt) {
                         const soundStatusText = `声音: ${isSoundOn ? '开' : '关'}`;
@@ -341,8 +351,7 @@
                             }
                         }, 1500);
                     }
-                 }
-                 else {
+                 } else {
                      const targetPage = selectedItemElement.getAttribute('data-target');
                      if (targetPage) {
                          selectedItemElement.style.transition = 'transform 0.1s ease';
@@ -383,15 +392,29 @@
             // btnToggleLanguage event listener removed
 
             // --- Initial Setup ---
-            updateSelection(); // Initial highlight
-            updateBrightnessVisual(); // Initialize brightness display
-            updateSoundToggleVisual(); // Initialize sound toggle display
+            updateSelection();
+            updateBrightnessVisual();
+            updateSoundToggleVisual();
+            updateLanguageVisual();
             if(progressCircle) {
                 progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
                 progressCircle.style.strokeDashoffset = circumference;
             }
             if(statusPrompt) statusPrompt.textContent = "设置";
             if(hintBar) hintBar.textContent = "旋转选择, 短按确认";
+
+            // 显示当前语言
+            const savedLanguage = localStorage.getItem('selectedLanguage') || 'zh-CN';
+            const languageMap = {
+                'zh-CN': '中文简体',
+                'zh-TW': '中文繁體',
+                'en': 'English',
+                'ko': '한국어',
+                'ja': '日本語'
+            };
+            if(currentLanguageElement) {
+                currentLanguageElement.textContent = languageMap[savedLanguage] || '中文简体';
+            }
         });
 
     </script>

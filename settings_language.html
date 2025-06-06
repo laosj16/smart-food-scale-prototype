@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>语言设置 - 智能食物秤 Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles */
+        body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding-bottom: 80px; }
+        .device-screen { width: 100%; max-width: 480px; aspect-ratio: 4 / 3; background-color: #1a1a1a; color: #e0e0e0; border-radius: 0.5rem; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
+        /* Status Bar */
+        .status-bar { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background-color: rgba(0, 0, 0, 0.2); flex-shrink: 0; height: 36px; position: relative; }
+        .status-bar i { font-size: 18px; color: #e0e0e0; line-height: 1; }
+        #status-prompt { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 15px; color: #a0a0a0; white-space: nowrap; max-width: calc(100% - 80px); overflow: hidden; text-overflow: ellipsis; }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Language Grid */
+        .language-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            justify-items: center; /* 水平居中 */
+            align-items: center; /* 垂直居中 */
+        }
+        .language-item {
+            width: 120px;
+            height: 90px;
+            background: #2A2A2A; /* 默认状态：深灰色背景 */
+            border: 2px solid #404040; /* 默认状态：深灰色边框 */
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .language-item:nth-child(4),
+        .language-item:nth-child(5) {
+            grid-column: auto;
+        }
+        .language-item i {
+            font-size: 20px;
+            margin-bottom: 6px;
+            color: #a0a0a0;
+            transition: color 0.2s ease;
+        }
+        .language-item span {
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            color: #e0e0e0;
+            line-height: 1.2;
+        }
+        .language-item.selected {
+            border-color: #FFD700; /* 选中状态：黄色边框 */
+            background: #1A1A1A; /* 选中状态：更深的灰色背景 */
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); /* 选中状态：黄色光晕效果 */
+        }
+        .language-item.selected i,
+        .language-item.selected span {
+            color: #ffffff;
+        }
+        .language-item.current {
+            background: #4A4A4A; /* 当前状态：更亮的灰色背景 */
+            border-color: #505050; /* 当前状态：边框颜色 */
+        }
+        .language-item.current.selected {
+            background: #2A2A2A; /* 当前且选中状态：深灰色背景 */
+            border-color: #FFD700; /* 当前且选中状态：黄色边框 */
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); /* 当前且选中状态：黄色光晕效果 */
+        }
+
+        /* Hint Bar */
+        .hint-bar {
+            text-align: center;
+            padding: 10px;
+            color: #fff;
+            font-size: 16px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Overlays and Progress Ring Styles */
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; z-index: 10; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease; }
+        .overlay.visible { opacity: 1; visibility: visible; }
+        .progress-ring { position: relative; width: 90px; height: 90px; margin-bottom: 1rem; }
+        .progress-ring__circle { transition: 0.1s stroke-dashoffset linear, 0.2s stroke ease; transform: rotate(-90deg); transform-origin: 50% 50%; }
+        .progress-ring__svg circle { stroke-width: 6; }
+        .progress-ring__svg .progress-ring__circle--background { r: 42; cx: 45; cy: 45; stroke: #555;}
+        .progress-ring__svg .progress-ring__circle { r: 42; cx: 45; cy: 45; }
+        .progress-ring__text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; font-weight: bold; }
+        #long-press-action-text { font-size: 1.1rem; text-align: center; padding: 0 10px;}
+        @keyframes blink-color { 0%, 100% { color: #facc15; } 50% { color: #ffffff; } }
+        .blink-text { animation: blink-color 1s infinite; font-weight: bold; }
+
+        /* Interaction Controls Styles */
+        .interaction-controls { position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(240, 240, 240, 0.95); backdrop-filter: blur(5px); padding: 0.75rem 1rem; border-top: 1px solid #ccc; display: flex; justify-content: center; align-items: center; gap: 0.5rem; z-index: 100; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); }
+        .control-button { padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 500; background-color: #4f46e5; color: white; border: none; border-radius: 0.375rem; cursor: pointer; transition: background-color 0.2s ease, transform 0.1s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .control-button:hover { background-color: #4338ca; }
+        .control-button:active { transform: scale(0.95); }
+        .control-button.secondary { background-color: #64748b; }
+        .control-button.secondary:hover { background-color: #475569; }
+        .control-button:disabled { background-color: #9ca3af; cursor: not-allowed; opacity: 0.7; }
+
+        /* 控制按钮样式 */
+        .control-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 20px;
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .control-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #2C2C2C;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 120px;
+        }
+
+        .control-btn:hover {
+            background: #3C3C3C;
+        }
+
+        .control-btn:active {
+            background: #1C1C1C;
+        }
+
+        .control-btn .btn-icon {
+            font-size: 20px;
+            margin: 0 5px;
+        }
+
+        .rotate-left {
+            flex-direction: row;
+        }
+
+        .rotate-right {
+            flex-direction: row;
+        }
+
+        .confirm {
+            background: #007AFF;
+        }
+
+        .confirm:hover {
+            background: #0066CC;
+        }
+
+        .return {
+            background: #FF3B30;
+        }
+
+        .return:hover {
+            background: #CC2F26;
+        }
+
+        /* 长按进度条样式 */
+        .long-press-progress {
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .long-press-progress.active {
+            display: block;
+        }
+
+        .long-press-progress-bar {
+            height: 100%;
+            background: #FF3B30;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .language-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+            color: #FFFFFF;
+            opacity: 0.9; /* 默认状态：图标透明度 */
+        }
+
+        .language-name {
+            font-size: 14px;
+            color: #FFFFFF;
+            text-align: center;
+            white-space: nowrap;
+            opacity: 0.9; /* 默认状态：文字透明度 */
+        }
+
+        .language-item.selected .language-icon,
+        .language-item.selected .language-name {
+            opacity: 1; /* 选中状态：图标和文字完全不透明 */
+        }
+    </style>
+</head>
+<body>
+    <div class="device-screen">
+        <div class="status-bar">
+            <i class="fa-brands fa-bluetooth-b"></i>
+            <span id="status-prompt">语言设置</span>
+            <i class="fa-solid fa-battery-full"></i>
+        </div>
+            
+            <div class="language-grid">
+                <div class="language-item" data-lang="zh-CN">
+                    <i class="language-icon">🇨🇳</i>
+                    <span class="language-name">中文简体</span>
+                </div>
+                <div class="language-item" data-lang="zh-TW">
+                    <i class="language-icon">🇭🇰</i>
+                    <span class="language-name">中文繁體</span>
+                </div>
+                <div class="language-item" data-lang="en">
+                    <i class="language-icon">🇺🇸</i>
+                    <span class="language-name">English</span>
+                </div>
+                <div class="language-item" data-lang="ko">
+                    <i class="language-icon">🇰🇷</i>
+                    <span class="language-name">한국어</span>
+                </div>
+                <div class="language-item" data-lang="ja">
+                    <i class="language-icon">🇯🇵</i>
+                    <span class="language-name">日本語</span>
+                </div>
+            </div>
+
+            <div class="hint-bar" id="hintBar">旋转选择语言，短按确认</div>
+        </div>
+
+        <div id="long-press-overlay" class="overlay">
+            <div class="progress-ring">
+                <svg class="progress-ring__svg" width="90" height="90">
+                    <circle class="progress-ring__circle progress-ring__circle--background" fill="transparent" r="42" cx="45" cy="45"/>
+                    <circle id="progress-circle" class="progress-ring__circle" stroke="#007AFF" stroke-linecap="round" fill="transparent" r="42" cx="45" cy="45"/>
+                </svg>
+                <span id="progress-text" class="progress-ring__text"></span>
+            </div>
+            <p id="long-press-action-text" class="mt-1 text-lg"></p>
+        </div>
+    </div>
+
+    <div class="interaction-controls">
+        <button id="btn-rotate-left" class="control-button" title="模拟向左旋转">← 旋转</button>
+        <button id="btn-rotate-right" class="control-button" title="模拟向右旋转">旋转 →</button>
+        <button id="btn-short-press" class="control-button" title="模拟短按确认">确认 (短按)</button>
+        <button id="btn-long-press" class="control-button secondary" title="模拟长按旋钮">长按 (返回)</button>
+        <button id="btn-return-index" class="control-button secondary" title="返回目录页面">返回目录</button>
+    </div>
+
+    <script>
+        // 语言选项数据
+        const languages = [
+            { id: 'zh-CN', name: '中文简体', icon: '🇨🇳' },
+            { id: 'zh-TW', name: '中文繁體', icon: '🇭🇰' },
+            { id: 'en', name: 'English', icon: '🇺🇸' },
+            { id: 'ko', name: '한국어', icon: '🇰🇷' },
+            { id: 'ja', name: '日本語', icon: '🇯🇵' }
+        ];
+
+        let currentIndex = 0;
+        let currentLanguage = localStorage.getItem('selectedLanguage') || 'zh-CN';
+
+        // 初始化页面
+        function initPage() {
+            console.log('Initializing page...');
+            // 设置当前语言
+            currentIndex = languages.findIndex(lang => lang.id === currentLanguage);
+            if (currentIndex === -1) currentIndex = 0;
+            
+            // 更新UI
+            updateSelection();
+            updateHint();
+
+            // 初始化控制按钮
+            initControlButtons();
+        }
+
+        // 更新选择状态
+        function updateSelection() {
+            console.log('Updating selection, current index:', currentIndex);
+            const items = document.querySelectorAll('.language-item');
+            items.forEach((item, index) => {
+                const isSelected = index === currentIndex;
+                const isCurrent = item.dataset.lang === currentLanguage;
+                
+                item.classList.toggle('selected', isSelected);
+                item.classList.toggle('current', isCurrent);
+            });
+        }
+
+        // 旋转选择
+        function rotate(direction) {
+            console.log('Rotate called with direction:', direction);
+            const oldIndex = currentIndex;
+            
+            if (direction === 'clockwise') {
+                currentIndex = (currentIndex + 1) % languages.length;
+            } else {
+                currentIndex = (currentIndex - 1 + languages.length) % languages.length;
+            }
+            
+            console.log('Index changed from', oldIndex, 'to', currentIndex);
+            updateSelection();
+            updateHint();
+        }
+
+        // 确认选择
+        function confirmSelection() {
+            console.log('Confirm selection called');
+            const selectedLang = languages[currentIndex].id;
+            if (selectedLang !== currentLanguage) {
+                currentLanguage = selectedLang;
+                localStorage.setItem('selectedLanguage', selectedLang);
+                // 直接返回设置主界面
+                window.location.href = 'settings_menu.html';
+            }
+        }
+
+        // 更新提示文本
+        function updateHint() {
+            console.log('Updating hint...');
+            const hintBar = document.getElementById('hintBar');
+            if (!hintBar) {
+                console.error('Hint bar element not found!');
+                return;
+            }
+            hintBar.textContent = '旋转选择语言，短按确认';
+        }
+
+        // 初始化控制按钮
+        function initControlButtons() {
+            const btnRotateLeft = document.getElementById('btn-rotate-left');
+            const btnRotateRight = document.getElementById('btn-rotate-right');
+            const btnShortPress = document.getElementById('btn-short-press');
+            const btnLongPress = document.getElementById('btn-long-press');
+            const btnReturnIndex = document.getElementById('btn-return-index');
+
+            // 旋转按钮事件
+            btnRotateLeft.addEventListener('click', () => {
+                console.log('Rotate left clicked');
+                rotate('counterclockwise');
+            });
+
+            btnRotateRight.addEventListener('click', () => {
+                console.log('Rotate right clicked');
+                rotate('clockwise');
+            });
+
+            // 确认按钮事件
+            btnShortPress.addEventListener('click', () => {
+                console.log('Short press clicked');
+                confirmSelection();
+            });
+
+            // 长按返回按钮事件
+            let longPressTimer = null;
+            const longPressDuration = 1000; // 1秒
+
+            btnLongPress.addEventListener('mousedown', () => {
+                console.log('Long press button pressed');
+                longPressTimer = setTimeout(() => {
+                    console.log('Long press triggered');
+                    window.location.href = 'settings_menu.html';
+                }, longPressDuration);
+            });
+
+            btnLongPress.addEventListener('mouseup', () => {
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                }
+            });
+
+            btnLongPress.addEventListener('mouseleave', () => {
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                }
+            });
+
+            // 返回目录按钮事件
+            btnReturnIndex.addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+        }
+
+        // 事件监听
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Content Loaded');
+            initPage();
+            
+            // 旋转事件
+            window.addEventListener('rotate', (e) => {
+                console.log('Rotate event received:', e);
+                // 检查事件类型
+                if (e.type === 'rotate') {
+                    const direction = e.detail?.direction || e.direction;
+                    if (direction) {
+                        console.log('Rotating:', direction);
+                        rotate(direction);
+                    }
+                }
+            });
+            
+            // 短按事件
+            window.addEventListener('shortPress', (e) => {
+                console.log('Short press event received:', e);
+                confirmSelection();
+            });
+            
+            // 长按事件
+            window.addEventListener('longPress', (e) => {
+                console.log('Long press event received:', e);
+                window.location.href = 'settings_menu.html';
+            });
+
+            // 添加键盘事件支持（用于测试）
+            document.addEventListener('keydown', (e) => {
+                console.log('Key pressed:', e.key);
+                switch(e.key) {
+                    case 'ArrowRight':
+                        rotate('clockwise');
+                        break;
+                    case 'ArrowLeft':
+                        rotate('counterclockwise');
+                        break;
+                    case 'Enter':
+                        confirmSelection();
+                        break;
+                    case 'Escape':
+                        window.location.href = 'settings_menu.html';
+                        break;
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

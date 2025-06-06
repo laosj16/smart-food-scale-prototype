@@ -258,21 +258,20 @@
                         secondsDisplay.classList.add('editable');
                         break;
                     case State.RUNNING:
-                        promptText = "倒计时中..."; hintTextVal = "短按暂停 / 长按返回"; shortPressAction = '暂停'; enableRotation = false;
+                        promptText = "倒计时中..."; hintTextVal = "短按暂停 / 长按退出"; shortPressAction = '暂停'; enableRotation = false;
                         ({ minutes: displayMins, seconds: displaySecs } = formatTime(remainingSeconds));
-                         // Apply warning class if needed (handled by interval, but double-check here)
                         if (remainingSeconds <= 5 && remainingSeconds > 0) {
                            timerDisplay.classList.add('timer-warning');
                         }
                         break;
                     case State.PAUSED:
-                        promptText = "已暂停"; hintTextVal = "短按继续 / 长按返回"; // Corrected hint
+                        promptText = "已暂停"; hintTextVal = "短按继续 / 长按退出";
                         shortPressAction = '继续'; enableRotation = false;
                         ({ minutes: displayMins, seconds: displaySecs } = formatTime(remainingSeconds));
                         timerDisplay.classList.add('paused');
                         break;
                     case State.FINISHED:
-                        promptText = "时间到!"; hintTextVal = "短按复位"; shortPressAction = '复位'; enableRotation = false;
+                        promptText = "时间到!"; hintTextVal = "短按复位 / 长按退出"; shortPressAction = '复位'; enableRotation = false;
                         displayMins = "00"; displaySecs = "00";
                         timerDisplay.classList.add('timer-finished-red');
                         break;
