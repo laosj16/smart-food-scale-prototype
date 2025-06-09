@@ -402,7 +402,7 @@
                     break;
                 case State.CUP_PLACED_TARED:
                     promptText = "等待萃取..."; 
-                    hintText = "左右旋转切换单位";
+                    hintText = "旋转切换单位";
                     showWeightPrimary = true; 
                     enableRotation = true;
                     break;
@@ -411,7 +411,7 @@
                     showWeightPrimary = true; enableRotation = false;
                     break;
                 case State.FINISHED:
-                    promptText = "萃取完成"; hintText = "短按复位 / 拿走杯子";
+                    promptText = "萃取完成"; hintText = "短按复位|拿走杯子";
                     showLiquidPrimary = true; enableRotation = false;
                     shortPressEnabled = true; shortPressAction = '复位';
                     break;

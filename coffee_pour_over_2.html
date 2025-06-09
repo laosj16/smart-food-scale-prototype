@@ -212,15 +212,15 @@
                     enableRotation = true; 
                     centerContentVertically = true; 
                     promptText = "请设置粉和水的比例"; 
-                    hintTextVal = "旋转调整, 短按确认"; 
+                    hintTextVal = "旋转调整｜短按确认"; 
                     shortPressAction = '确认比例'; 
                     break;
                 case State.WAITING_CARAFE: 
                     showWeightPrimaryLarge = true; 
                     enableRotation = true; 
                     centerContentVertically = false; 
-                    promptText = "等待放置...."; 
-                    hintTextVal = "请放上咖啡量杯壶"; 
+                    promptText = "请放上咖啡量杯壶"; 
+                    hintTextVal = "旋转切换单位"; 
                     shortPressAction = 'TARE'; 
                     break;
                 case State.WAITING_GEAR_TARE: 
@@ -229,10 +229,10 @@
                     centerContentVertically = false; 
                     if (currentWeight > 10) {
                         promptText = "等待去皮...."; 
-                        hintTextVal = "左右旋转切换单位, 短按TARE去皮"; 
+                        hintTextVal = "旋转切换单位｜短按去皮"; 
                     } else {
-                        promptText = "等待放置...."; 
-                        hintTextVal = "请放上滤杯与滤纸"; 
+                        promptText = "请放上滤杯与滤纸"; 
+                        hintTextVal = "旋转切换单位"; 
                     }
                     shortPressAction = 'TARE'; 
                     break;
@@ -240,8 +240,8 @@
                     showWeightPrimaryLarge = true; 
                     enableRotation = true; 
                     centerContentVertically = false; 
-                    promptText = "等待放置...."; 
-                    hintTextVal = "接下来，请加入咖啡粉"; 
+                    promptText = "接下来，请加入咖啡粉"; 
+                    hintTextVal = "旋转切换单位"; 
                     shortPressAction = 'TARE'; 
                     break;
                 case State.WEIGHING_GROUNDS: 
@@ -249,7 +249,7 @@
                     enableRotation = true; 
                     centerContentVertically = false; 
                     promptText = "等待去皮...."; 
-                    hintTextVal = "左右旋转切换单位, 短按TARE去皮"; 
+                    hintTextVal = "旋转切换单位｜短按去皮"; 
                     shortPressAction = 'TARE'; 
                     break;
                 case State.READY_TO_POUR: 
@@ -268,11 +268,11 @@
                     showSecondary = true; 
                     enableRotation = false; 
                     centerContentVertically = true; 
-                    hintTextVal = "短按旋钮停止计时"; 
+                    hintTextVal = "短按停止计时"; 
                     break;
                 case State.FINISHED: 
                     promptText = "冲煮完成"; 
-                    hintTextVal = "短按旋钮复位 / 也可拿走滤杯显示粉液比"; 
+                    hintTextVal = "短按复位 | 移除滤杯看粉液比"; 
                     shortPressAction = '复位'; 
                     showWaterPrimary = true; 
                     showSecondary = true; 
@@ -285,7 +285,7 @@
                     enableRotation = false; 
                     centerContentVertically = true; 
                     promptText = "计算液重"; 
-                    hintTextVal = "短按 TARE 复位"; 
+                    hintTextVal = "短按复位"; 
                     shortPressAction = '复位'; 
                     break;
             }
@@ -335,7 +335,7 @@
                     if (calculatedTargetWaterWeight > 0.01) {
                         progressPercent = Math.min(100, (totalWaterWeight / calculatedTargetWaterWeight) * 100);
                     }
-                    hintTextVal = `短按旋钮停止计时 (${progressPercent.toFixed(0)}%)`;
+                    hintTextVal = `短按停止计时 (${progressPercent.toFixed(0)}%)`;
                 }
                 // For other states, hintTextVal is already set in the switch or will use the default from cancelLongPress
                 hintBar.textContent = hintTextVal;

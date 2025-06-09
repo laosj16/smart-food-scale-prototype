@@ -246,19 +246,19 @@
 
                 switch (currentState) {
                     case State.SETTING_MINUTES:
-                        promptText = "设置分钟"; hintTextVal = "旋转调整分钟, 短按确认"; shortPressAction = '确认分钟'; enableRotation = true;
+                        promptText = "设置分钟"; hintTextVal = "旋转调整分钟 | 短按确认"; shortPressAction = '确认分钟'; enableRotation = true;
                         displayMins = String(setMinutes).padStart(2, '0');
                         displaySecs = String(setSeconds).padStart(2, '0');
                         minutesDisplay.classList.add('editable');
                         break;
                     case State.SETTING_SECONDS:
-                        promptText = "设置秒钟"; hintTextVal = "旋转调整秒钟, 短按开始"; shortPressAction = '开始计时'; enableRotation = true;
+                        promptText = "设置秒钟"; hintTextVal = "旋转调整秒钟 | 短按确认"; shortPressAction = '开始计时'; enableRotation = true;
                         displayMins = String(setMinutes).padStart(2, '0');
                         displaySecs = String(setSeconds).padStart(2, '0');
                         secondsDisplay.classList.add('editable');
                         break;
                     case State.RUNNING:
-                        promptText = "倒计时中..."; hintTextVal = "短按暂停 / 长按退出"; shortPressAction = '暂停'; enableRotation = false;
+                        promptText = "倒计时中..."; hintTextVal = "短按暂停 | 长按退出"; shortPressAction = '暂停'; enableRotation = false;
                         ({ minutes: displayMins, seconds: displaySecs } = formatTime(remainingSeconds));
                         if (remainingSeconds <= 5 && remainingSeconds > 0) {
                            timerDisplay.classList.add('timer-warning');

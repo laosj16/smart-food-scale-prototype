@@ -151,7 +151,7 @@
             </div>
         </div>
 
-        <div id="hint-bar" class="hint-bar">左右旋转切换单位 , 短按“TARE”去皮</div>
+        <div id="hint-bar" class="hint-bar">旋转切换单位｜短按去皮</div>
     </div>
 
     <div class="interaction-controls">
@@ -321,7 +321,7 @@
             if (currentLongPressDuration < LONG_PRESS_POWER_OFF_DURATION) {
                 remainingSecondsForPowerOff = Math.ceil((LONG_PRESS_POWER_OFF_DURATION - currentLongPressDuration) / 1000);
                 if (hintBar) {
-                    hintBar.innerHTML = `长按<span class="blink-text-inline">${remainingSecondsForPowerOff}s</span>后将关机，现在松开旋钮返回上一级菜单`;
+                    hintBar.innerHTML = `长按返回  | 继续按住<span class="blink-text-inline">${remainingSecondsForPowerOff}s</span>关机`;
                 }
                 if (currentLongPressDuration < LONG_PRESS_RETURN_DURATION) {
                     currentLongPressAction = LONG_PRESS_ACTION_NONE; 
@@ -350,7 +350,7 @@
 
             if (hintBar) {
                 hintBar.classList.remove('long-press-active');
-                hintBar.textContent = "左右旋转切换单位 , 短按“TARE”去皮"; 
+                hintBar.textContent = "旋转切换单位｜短按去皮"; 
             }
             if (statusPrompt) statusPrompt.textContent = "通用称重"; 
 
@@ -382,7 +382,7 @@
         window.addEventListener('load', () => {
             updateDisplay(); 
             if (hintBar) {
-                hintBar.textContent = "左右旋转切换单位 , 短按“TARE”去皮";
+                hintBar.textContent = "旋转切换单位｜短按去皮";
                 // hintBar.style.opacity = '1'; // Ensure it's visible on load if not by CSS default
             }
             if (statusPrompt) statusPrompt.textContent = "通用称重";

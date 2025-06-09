@@ -276,12 +276,12 @@
 
                 if (isFoodConfirmed) {
                     const food = foodDatabase[selectedFoodIndex];
-                    promptText = `营养成分 (${food.name})`;
+                    promptText = `${food.name}`;
                     const formattedWeight = formatWeight(currentWeight);
                     if (weightValue) weightValue.textContent = formattedWeight.value;
                     if (weightUnit) { weightUnit.textContent = formattedWeight.unit; weightUnit.className = 'weight-unit'; if (unitColors[formattedWeight.unit]) { weightUnit.classList.add(unitColors[formattedWeight.unit]); }}
                     populateNutrientDisplays();
-                    hintTextVal = isWeighing ? "旋转来向下滚动查看, 短按去皮" : "请放置食物称重,左右旋转切换单位";
+                    hintTextVal = isWeighing ? "旋转查看更多 | 短按去皮" : "旋转切换单位｜短按去皮";
                     shortPressAction = 'TARE';
                 } else {
                     promptText = "选择食物";
@@ -290,7 +290,7 @@
                     foodItemElements.forEach((item, index) => {
                         if(item) item.classList.toggle('selected', index === indexOnPage);
                     });
-                    hintTextVal = "旋转选择食物, 短按确认";
+                    hintTextVal = "旋转选择 | 短按确认";
                     shortPressAction = '确认食物';
                 }
                 statusPrompt.textContent = promptText;
