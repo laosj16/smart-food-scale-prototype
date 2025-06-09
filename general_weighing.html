@@ -153,7 +153,7 @@
             </div>
         </div>
 
-        <div id="hint-bar" class="hint-bar"><i class="bi bi-disc"></i> 切换单位 | 短按去皮</div>
+        <div id="hint-bar" class="hint-bar">旋转切换单位｜短按去皮</div>
     </div>
 
     <div class="interaction-controls">
@@ -334,9 +334,21 @@
         }
 
         function tareWeight() {
-            currentWeight = 0.0; updateDisplay();
-            tareIndicator.classList.add('visible'); if (tareTimeout) { clearTimeout(tareTimeout); }
-            tareTimeout = setTimeout(() => { tareIndicator.classList.remove('visible'); tareTimeout = null; }, 1000);
+            // 1. 立即显示 TARE 指示器
+            tareIndicator.classList.add('visible');
+            if (tareTimeout) {
+                clearTimeout(tareTimeout);
+            }
+
+            // 2. 设置1秒后隐藏 TARE 指示器，并在此之后更新重量
+            tareTimeout = setTimeout(() => {
+                tareIndicator.classList.remove('visible');
+                tareTimeout = null;
+                
+                // 将重量清零并更新显示
+                currentWeight = 0.0;
+                updateDisplay();
+            }, 1000); // 1秒后执行
         }
 
         function addWeight() {
@@ -428,7 +440,7 @@
 
             if (hintBar) {
                 hintBar.classList.remove('long-press-active');
-                hintBar.innerHTML = '<i class="bi bi-disc"></i> 切换单位 | 短按去皮'; 
+                hintBar.innerHTML = '旋转切换单位｜短按去皮'; 
             }
             if (statusPrompt) statusPrompt.textContent = "通用称重"; 
 
@@ -465,7 +477,7 @@
         window.addEventListener('load', () => {
             updateDisplay(); 
             if (hintBar) {
-                hintBar.innerHTML = '<i class="bi bi-disc"></i> 切换单位 | 短按去皮';
+                hintBar.innerHTML = '旋转切换单位｜短按去皮';
                 // hintBar.style.opacity = '1'; // Ensure it's visible on load if not by CSS default
             }
             if (statusPrompt) statusPrompt.textContent = "通用称重";

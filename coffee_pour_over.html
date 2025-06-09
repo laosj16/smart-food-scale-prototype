@@ -175,154 +175,264 @@
         function startTimer() { if (timerInterval) return; timerSeconds = 0; lastWaterAddTime = Date.now(); lastWaterWeight = 0.0; currentFlowRate = 0.0; timerValue.textContent = formatTime(timerSeconds); timerInterval = setInterval(() => { timerSeconds++; if (timerSeconds >= 600) { stopTimer(); timerSeconds = 599; } timerValue.textContent = formatTime(timerSeconds); if (currentState === State.POURING && !pouringInterval) { calculateFlowRate(0); } }, 1000); }
         function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } if (pouringInterval) { clearInterval(pouringInterval); pouringInterval = null; } currentFlowRate = 0.0; }
         function resetScale() { stopTimer(); timerSeconds = 0; currentWeight = 0.0; carafeWeight = 0.0; measuredFilterWeight = 0.0; measuredGroundsWeight = 0.0; coffeeGroundsWeight = 15.7; totalWaterWeight = 0.0; coffeeLiquidWeight = 0.0; removedWeight = 0.0; currentUnitIndex = 0; currentFlowRate = 0.0; setState(State.INIT); }
-        function getDecimalPlaces(weight, unit) { if (unit === 'g' || unit === 'ml') { if (weight < 500) return 1; if (weight <= 1000) return 0; if (weight <= 2000) return 0; if (weight <= 3000) return 0; if (weight <= 4000) return 0; return 0; } else if (unit === 'oz') { if (weight < 17.64) return 2; if (weight < 35.27) return 1; return 0; } else if (unit === 'fl:oz') { if (weight < 16.91) return 2; if (weight < 33.81) return 1; return 0; } else if (unit === 'lb') { if (weight < 1.1) return 3; if (weight < 2.2) return 2; if (weight < 4.4) return 2; return 1; } return 1; }
-        function formatWeight(weightValue) { const currentUnit = units[currentUnitIndex]; let displayWeight; let valueInGrams = weightValue; let displayUnit = 'g'; let valueToDisplay = valueInGrams; if (currentUnit === 'ml') { valueToDisplay = valueInGrams / G_PER_ML; displayUnit = 'ml'; } else if (currentUnit === 'oz') { valueToDisplay = valueInGrams / G_PER_OZ; displayUnit = 'oz'; } else if (currentUnit === 'fl:oz') { valueToDisplay = valueInGrams / ML_PER_FL_OZ; displayUnit = 'fl:oz'; } else if (currentUnit === 'lb') { valueToDisplay = valueInGrams / G_PER_LB; displayUnit = 'lb'; } const decimalPlaces = getDecimalPlaces(valueToDisplay, currentUnit); if (Math.abs(valueToDisplay) < 0.3 && (currentUnit === 'g' || currentUnit === 'ml')) { displayWeight = '0.0'; } else { displayWeight = valueToDisplay.toFixed(decimalPlaces); } return { value: displayWeight, unit: displayUnit }; }
+        
+        function roundToIncrement(value, increment) {
+            return Math.round(value / increment) * increment;
+        }
+
+        function getDecimalPlaces(weight, unit) {
+            // 根据新的分度值规则返回应显示的小数位数
+            if (unit === 'g') {
+                if (weight < 1000) return 1; // <1000g 分度值0.1g
+                return 0;                    // >=1000g 分度值1g
+            } else if (unit === 'ml') {
+                if (weight < 1000) return 1; // <1000ml 分度值0.1ml
+                return 0;                    // >=1000ml 分度值1ml
+            } else if (unit === 'fl:oz') {
+                if (weight < 100) return 3;  // ＜100 fl:oz 分度值0.005fl：oz
+                return 2;                    // ≥100 fl:oz 分度值0.05fl：oz
+            } else if (unit === 'oz') {
+                if (weight < 100) return 3;  // ＜100oz 分度值0.005 oz
+                return 2;                    // ≥100oz 分度值0.05oz
+            } else if (unit === 'lb') {
+                if (weight < 2) return 4;    // ＜2lb 分度值0.0005 lb
+                return 3;                    // ≥2lb 分度值0.002lb
+            }
+            return 1; // 默认返回1位小数 (作为备用)
+        }
+
+        function formatWeight(weightValue) {
+            const currentUnit = units[currentUnitIndex];
+            let valueInGrams = weightValue;
+            let displayUnit = 'g';
+            let convertedWeight = valueInGrams;
+
+            if (currentUnit === 'ml') {
+                convertedWeight = valueInGrams / G_PER_ML;
+                displayUnit = 'ml';
+            } else if (currentUnit === 'oz') {
+                convertedWeight = valueInGrams / G_PER_OZ;
+                displayUnit = 'oz';
+            } else if (currentUnit === 'fl:oz') {
+                convertedWeight = valueInGrams / ML_PER_FL_OZ;
+                displayUnit = 'fl:oz';
+            } else if (currentUnit === 'lb') {
+                convertedWeight = valueInGrams / G_PER_LB;
+                displayUnit = 'lb';
+            }
+
+            const decimalPlaces = getDecimalPlaces(convertedWeight, currentUnit);
+            let adjustedWeight = convertedWeight;
+
+            // Apply rounding based on increment
+            if (currentUnit === 'fl:oz') {
+                if (adjustedWeight < 100) adjustedWeight = roundToIncrement(adjustedWeight, 0.005);
+                else adjustedWeight = roundToIncrement(adjustedWeight, 0.05);
+            } else if (currentUnit === 'oz') {
+                if (adjustedWeight < 100) adjustedWeight = roundToIncrement(adjustedWeight, 0.005);
+                else adjustedWeight = roundToIncrement(adjustedWeight, 0.05);
+            } else if (currentUnit === 'lb') {
+                if (adjustedWeight < 2) adjustedWeight = roundToIncrement(adjustedWeight, 0.0005);
+                else adjustedWeight = roundToIncrement(adjustedWeight, 0.002);
+            }
+
+            let displayWeight;
+            if (Math.abs(convertedWeight) < 0.0001) {
+                displayWeight = (0).toFixed(decimalPlaces);
+            } else if (Math.abs(convertedWeight) < 0.3 && (currentUnit === 'g' || currentUnit === 'ml')) {
+                if (Math.abs(adjustedWeight) < 0.0001 && decimalPlaces === 1) {
+                    displayWeight = '0.0';
+                } else {
+                    displayWeight = adjustedWeight.toFixed(decimalPlaces);
+                }
+            } else {
+                displayWeight = adjustedWeight.toFixed(decimalPlaces);
+            }
+
+            return { value: displayWeight, unit: displayUnit };
+        }
+
         function formatFlowRate(rateGramsPerSecond) { const currentUnit = units[currentUnitIndex]; let displayRate; let displayUnitSuffix = '/s'; if (currentUnit === 'ml') { displayRate = (rateGramsPerSecond / G_PER_ML).toFixed(1); displayUnitSuffix = 'ml/s'; } else if (currentUnit === 'oz') { displayRate = (rateGramsPerSecond / G_PER_OZ).toFixed(1); displayUnitSuffix = 'oz/s'; } else if (currentUnit === 'fl:oz') { displayRate = (rateGramsPerSecond / ML_PER_FL_OZ).toFixed(1); displayUnitSuffix = 'fl:oz/s'; } else if (currentUnit === 'lb') { displayRate = (rateGramsPerSecond / G_PER_LB).toFixed(2); displayUnitSuffix = 'lb/s'; } else { displayRate = rateGramsPerSecond.toFixed(1); displayUnitSuffix = 'g/s'; } if (Math.abs(parseFloat(displayRate)) < 0.01) { displayRate = (0.0).toFixed(displayRate.includes('.') ? displayRate.split('.')[1].length : 1); } return { value: displayRate, unit: displayUnitSuffix }; }
         function showTareIndicator() { tareIndicator.classList.add('visible'); if (tareTimeout) { clearTimeout(tareTimeout); } tareTimeout = setTimeout(() => { tareIndicator.classList.remove('visible'); tareTimeout = null; }, 1000); }
         function calculateFlowRate(addedWater) { const now = Date.now(); const timeDiff = (now - lastWaterAddTime) / 1000; if (timeDiff > 0.1) { currentFlowRate = addedWater / timeDiff; lastWaterAddTime = now; lastWaterWeight = totalWaterWeight; } else if (addedWater === 0 && timeDiff > 0.5) { currentFlowRate = 0.0; } if (!secondaryDisplay.classList.contains('hidden')) { bottomLeftValue.textContent = currentFlowRate.toFixed(1); } }
 
         function updateUI() {
             const currentUnit = units[currentUnitIndex]; let promptText = ''; let hintTextVal = ''; let shortPressAction = ''; let showWeightPrimaryLarge = false; let showWaterPrimary = false; let showLiquidPrimary = false; let showSecondary = false; let enableRotation = false; let shortPressEnabled = true; let useInlineLayout = false;
-            switch (currentState) { 
-                case State.INIT: 
-                case State.WAITING_CARAFE:
-                    showWeightPrimaryLarge = true; 
-                    enableRotation = true; 
-                    promptText = "等待放置..."; 
-                    hintTextVal = "请放上咖啡量杯壶"; 
-                    shortPressAction = 'TARE'; 
-                    break;
-                case State.WAITING_FILTER: 
-                case State.FILTER_PLACED: 
-                case State.WAITING_GROUNDS: 
-                case State.WEIGHING_GROUNDS: 
-                    showWeightPrimaryLarge = true; 
-                    enableRotation = true; 
-                    break;
-                case State.READY_TO_POUR: case State.POURING: case State.FINISHED: showWaterPrimary = true; showSecondary = true; enableRotation = false; useInlineLayout = true; shortPressEnabled = (currentState !== State.READY_TO_POUR); break; case State.WEIGHING_LIQUID: showLiquidPrimary = true; showSecondary = true; enableRotation = false; useInlineLayout = true; break; }
-            primaryDisplay.classList.toggle('inline-layout', useInlineLayout); primaryUnit.style.display = 'inline-block'; 
-            if (showWeightPrimaryLarge) { const formatted = formatWeight(currentWeight); primaryValue.textContent = formatted.value; primaryUnit.textContent = formatted.unit; primaryUnit.className = 'primary-unit'; if (unitColors[formatted.unit]) { primaryUnit.classList.add(unitColors[formatted.unit]); } primaryValue.style.fontSize = '100px'; primaryUnit.style.display = 'block'; primaryUnit.style.marginTop = '8px'; } else if (showWaterPrimary) { const formatted = formatWeight(totalWaterWeight); primaryValue.textContent = formatted.value; primaryUnit.textContent = formatted.unit; primaryUnit.className = 'primary-unit'; if (unitColors[formatted.unit]) { primaryUnit.classList.add(unitColors[formatted.unit]); } primaryValue.style.fontSize = '72px'; primaryUnit.style.marginTop = '0'; } else if (showLiquidPrimary) { const formatted = formatWeight(coffeeLiquidWeight); primaryValue.textContent = formatted.value; primaryUnit.textContent = formatted.unit; primaryUnit.className = 'primary-unit'; if (unitColors[formatted.unit]) { primaryUnit.classList.add(unitColors[formatted.unit]); } primaryValue.style.fontSize = '72px'; primaryUnit.style.marginTop = '0'; }
-            secondaryDisplay.classList.toggle('hidden', !showSecondary); primaryDisplayContainer.classList.toggle('with-secondary', showSecondary); document.querySelector('.main-content').classList.toggle('with-secondary', showSecondary);
-            
-            if (showSecondary) { 
-                let ratio = '--'; 
-                const grounds = measuredGroundsWeight > 0.1 ? measuredGroundsWeight : coffeeGroundsWeight; 
-                const groundsFormatted = formatWeight(grounds); 
-                const totalWaterFormatted = formatWeight(totalWaterWeight); 
-                const liquidFormatted = formatWeight(coffeeLiquidWeight); 
-                const removedFormatted = formatWeight(removedWeight); 
-                
-                // Always reset classes first to ensure only one bg-* class is active
-                ratioInfoItem.className = 'info-item';
-                timeInfoItem.className = 'info-item bg-time'; // Time is always yellow
-                bottomLeftInfoItem.className = 'info-item'; 
-                bottomRightInfoItem.className = 'info-item'; 
+            let centerContentVertically = true;
 
-                if (grounds > 0.1) { 
-                    if (currentState === State.POURING || currentState === State.READY_TO_POUR || currentState === State.FINISHED) { 
-                        ratio = (totalWaterWeight / grounds).toFixed(1); 
-                        ratioLabel.textContent = "粉水比"; 
-                        timerValue.textContent = formatTime(timerSeconds); 
-                        bottomLeftLabel.textContent = "流速"; 
-                        const flowRateFormatted = formatFlowRate(currentFlowRate); 
-                        bottomLeftValue.textContent = flowRateFormatted.value; 
-                        bottomLeftUnit.textContent = flowRateFormatted.unit; 
-                        bottomRightLabel.textContent = "粉重"; 
-                        bottomRightValue.textContent = groundsFormatted.value; 
-                        bottomRightInfoItem.querySelector('.info-unit').textContent = groundsFormatted.unit; 
-                        
-                        ratioInfoItem.classList.add('bg-ratio');
-                        bottomLeftInfoItem.classList.add('bg-flow'); 
-                        bottomRightInfoItem.classList.add('bg-grounds'); 
-                    } else { // WEIGHING_LIQUID
-                         ratio = (coffeeLiquidWeight / grounds).toFixed(1); 
-                         ratioLabel.textContent = "粉液比"; 
-                         timerValue.textContent = formatTime(timerSeconds); 
-                         bottomLeftLabel.textContent = "移走重量"; 
-                         bottomLeftValue.textContent = removedFormatted.value; 
-                         bottomLeftUnit.textContent = removedFormatted.unit; 
-                         bottomRightLabel.textContent = "总注水"; 
-                         bottomRightValue.textContent = totalWaterFormatted.value; 
-                         bottomRightInfoItem.querySelector('.info-unit').textContent = totalWaterFormatted.unit; 
-                         
-                         ratioInfoItem.className = 'info-item bg-liquid'; // Ensure full class replacement
-                         bottomLeftInfoItem.className = 'info-item bg-removed'; // Ensure full class replacement
-                         bottomRightInfoItem.className = 'info-item bg-total-water'; // Ensure full class replacement
-                    } 
-                } else { 
-                      ratioLabel.textContent = "水粉比"; 
-                      timerValue.textContent = formatTime(timerSeconds); 
-                      bottomLeftLabel.textContent = "流速"; 
-                      bottomLeftValue.textContent = '0.0'; 
-                      bottomLeftUnit.textContent = "g/s"; 
-                      bottomRightLabel.textContent = "粉重"; 
-                      bottomRightValue.textContent = '0.0'; 
-                      bottomRightInfoItem.querySelector('.info-unit').textContent = 'g'; 
-                      
-                      ratioInfoItem.classList.add('bg-ratio');
-                      bottomLeftInfoItem.classList.add('bg-flow'); 
-                      bottomRightInfoItem.classList.add('bg-grounds'); 
-                } 
-                ratioValue.textContent = `1:${ratio}`; 
-            }
             switch (currentState) { 
                 case State.INIT: 
-                    promptText = "等待放置...."; 
-                    hintTextVal = "请放上咖啡量杯壶"; 
+                    promptText = "请放上咖啡量杯壶"; 
+                    hintTextVal = "旋转切换单位"; 
                     shortPressAction = 'TARE'; 
+                    showWeightPrimaryLarge = true;
+                    enableRotation = true;
+                    centerContentVertically = false;
                     break; 
                 case State.WAITING_FILTER: 
-                    promptText = "等待放置...."; 
-                    hintTextVal = "请放上滤杯与滤纸"; 
+                    promptText = "请放上滤杯与滤纸"; 
+                    hintTextVal = "旋转切换单位"; 
                     shortPressAction = 'TARE'; 
+                    showWeightPrimaryLarge = true;
+                    enableRotation = true;
+                    centerContentVertically = false;
                     break; 
                 case State.FILTER_PLACED: 
                     promptText = "等待去皮...."; 
-                    hintTextVal = "左右旋转切换单位 , 短按\"TARE\"去皮"; 
+                    hintTextVal = "旋转切换单位｜短按去皮"; 
                     shortPressAction = 'TARE'; 
+                    showWeightPrimaryLarge = true;
+                    enableRotation = true;
+                    centerContentVertically = false;
                     break; 
                 case State.WAITING_GROUNDS: 
-                    promptText = "等待放置...."; 
-                    hintTextVal = "接下来，请加入咖啡粉"; 
+                    promptText = "接下来，请加入咖啡粉"; 
+                    hintTextVal = "旋转切换单位"; 
                     shortPressAction = 'TARE'; 
+                    showWeightPrimaryLarge = true;
+                    enableRotation = true;
+                    centerContentVertically = false;
                     break; 
                 case State.WEIGHING_GROUNDS: 
                     promptText = "等待去皮...."; 
-                    hintTextVal = "左右旋转切换单位 , 短按\"TARE\"去皮"; 
+                    hintTextVal = "旋转切换单位｜短按去皮"; 
                     shortPressAction = 'TARE'; 
+                    showWeightPrimaryLarge = true;
+                    enableRotation = true;
+                    centerContentVertically = false;
                     break; 
                 case State.READY_TO_POUR: 
                     promptText = "等待注水..."; 
                     hintTextVal = "准备就绪，可以开始注水"; 
                     shortPressAction = '---'; 
+                    showSecondary = true;
+                    showWaterPrimary = true;
+                    shortPressEnabled = false;
                     break; 
                 case State.POURING: 
                     promptText = "注水中..."; 
                     hintTextVal = "短按旋钮停止计时"; 
                     shortPressAction = '停止'; 
+                    showSecondary = true;
+                    showWaterPrimary = true;
                     break; 
                 case State.FINISHED: 
                     promptText = "冲煮完成"; 
-                    hintTextVal = "短按旋钮复位 / 也可拿走滤杯显示粉液比"; 
+                    hintTextVal = "短按复位 | 移除滤杯看粉液比"; 
                     shortPressAction = '复位'; 
+                    showSecondary = true;
+                    showWaterPrimary = true;
                     break; 
                 case State.WEIGHING_LIQUID: 
                     promptText = "计算液重"; 
-                    hintTextVal = "短按 TARE 复位"; 
+                    hintTextVal = "短按复位"; 
                     shortPressAction = '复位'; 
+                    showSecondary = true;
+                    showLiquidPrimary = true;
                     break; 
                 case State.WAITING_CARAFE: 
                     showWeightPrimaryLarge = true; 
                     enableRotation = true; 
                     centerContentVertically = false; 
-                    promptText = "等待放置...."; 
-                    hintTextVal = "请放上咖啡量杯壶"; 
+                    promptText = "请放上咖啡量杯壶"; 
+                    hintTextVal = "旋转切换单位"; 
                     shortPressAction = 'TARE'; 
                     break; 
             }
             statusPrompt.textContent = promptText; 
             if (!longPressActive && hintBar) hintBar.textContent = hintTextVal; 
-            btnShortPress.textContent = `${shortPressAction === '---' ? '---' : shortPressAction} (短按)`; btnShortPress.disabled = !shortPressEnabled; btnRotateLeft.disabled = !enableRotation; btnRotateRight.disabled = !enableRotation;
+            btnShortPress.textContent = `${shortPressAction === '---' ? '---' : shortPressAction} (短按)`; 
+            btnShortPress.disabled = !shortPressEnabled; 
+            btnRotateLeft.disabled = !enableRotation; 
+            btnRotateRight.disabled = !enableRotation;
+
+            // Restore display logic
+            let weightToDisplay = 0;
+            if (showWaterPrimary) {
+                weightToDisplay = totalWaterWeight;
+            } else if (showLiquidPrimary) {
+                weightToDisplay = coffeeLiquidWeight;
+            } else {
+                weightToDisplay = currentWeight;
+            }
+
+            const { value, unit } = formatWeight(weightToDisplay);
+            primaryValue.textContent = value;
+            primaryUnit.textContent = unit;
+            primaryUnit.className = 'primary-unit'; // Reset classes
+            if (unitColors[unit]) {
+                primaryUnit.classList.add(unitColors[unit]);
+            }
+
+            if (showSecondary) {
+                secondaryDisplay.classList.remove('hidden');
+                document.querySelector('.main-content').classList.add('with-secondary');
+                primaryDisplay.style.marginBottom = '0';
+
+                const grounds = measuredGroundsWeight > 0.1 ? measuredGroundsWeight : coffeeGroundsWeight;
+                const ratio = (grounds > 0 && totalWaterWeight > 0) ? (totalWaterWeight / grounds) : 0;
+                ratioValue.textContent = ratio > 0 ? `1:${ratio.toFixed(1)}` : '--';
+                
+                timerValue.textContent = formatTime(timerSeconds);
+
+                const flowRateFormatted = formatFlowRate(currentFlowRate);
+                bottomLeftValue.textContent = flowRateFormatted.value;
+                bottomLeftUnit.textContent = flowRateFormatted.unit;
+
+                const groundsFormatted = formatWeight(grounds);
+                bottomRightValue.textContent = groundsFormatted.value;
+                bottomRightUnit.textContent = groundsFormatted.unit;
+
+                if (currentState === State.WEIGHING_LIQUID) {
+                    const liquidFormatted = formatWeight(coffeeLiquidWeight);
+                    const removedFormatted = formatWeight(removedWeight);
+                    const totalWaterFormatted = formatWeight(totalWaterWeight);
+                    const finalRatio = (grounds > 0 && coffeeLiquidWeight > 0) ? (coffeeLiquidWeight / grounds) : 0;
+
+                    ratioLabel.textContent = "最终粉液比";
+                    ratioValue.textContent = finalRatio > 0 ? `1:${finalRatio.toFixed(1)}` : '--';
+                    ratioInfoItem.className = 'info-item bg-ratio';
+
+                    timeInfoItem.className = 'info-item bg-liquid';
+                    timeInfoItem.querySelector('.info-label').textContent = "咖啡液重";
+                    timeInfoItem.querySelector('.info-value').innerHTML = `${liquidFormatted.value}<span class="info-unit">${liquidFormatted.unit}</span>`;
+
+                    bottomLeftLabel.textContent = "总注水量";
+                    bottomLeftInfoItem.className = 'info-item bg-total-water';
+                    bottomLeftValue.textContent = totalWaterFormatted.value;
+                    bottomLeftUnit.textContent = totalWaterFormatted.unit;
+
+                    bottomRightLabel.textContent = "移走重量";
+                    bottomRightInfoItem.className = 'info-item bg-removed';
+                    bottomRightValue.textContent = removedFormatted.value;
+                    bottomRightUnit.textContent = removedFormatted.unit;
+                } else {
+                    ratioLabel.textContent = "水粉比";
+                    ratioInfoItem.className = 'info-item bg-ratio';
+                    
+                    timeInfoItem.className = 'info-item bg-time';
+                    timeInfoItem.querySelector('.info-label').textContent = "时间";
+                    timeInfoItem.querySelector('.info-value').textContent = formatTime(timerSeconds);
+
+                    bottomLeftLabel.textContent = "流速";
+                    bottomLeftInfoItem.className = 'info-item bg-flow';
+                    
+                    bottomRightLabel.textContent = "粉重";
+                    bottomRightInfoItem.className = 'info-item bg-grounds';
+                }
+
+            } else {
+                secondaryDisplay.classList.add('hidden');
+                document.querySelector('.main-content').classList.remove('with-secondary');
+                primaryDisplay.style.marginBottom = '0';
+            }
+
+            if (centerContentVertically) {
+                primaryDisplayContainer.style.justifyContent = 'center';
+            } else {
+                primaryDisplayContainer.style.justifyContent = 'flex-end';
+                primaryDisplayContainer.style.paddingBottom = '15%';
+            }
         }
         function setState(newState) { console.log(`State transition: ${currentState} -> ${newState}`); currentState = newState; updateUI(); }
         function simulatePlacement(weight) { console.log(`Simulating placement: ${weight}g`); currentWeight += weight; switch (currentState) { case State.INIT: if (currentWeight > 10) { carafeWeight = currentWeight; console.log(`Carafe detected (${carafeWeight.toFixed(1)}g), auto-taring.`); setTimeout(() => { showTareIndicator(); currentWeight = 0.0; setState(State.WAITING_FILTER); }, 500); } break; case State.WAITING_FILTER: if (currentWeight > 5) { measuredFilterWeight = currentWeight; console.log(`Filter detected (${measuredFilterWeight.toFixed(1)}g gross). Waiting manual tare.`); setState(State.FILTER_PLACED); } break; case State.WAITING_GROUNDS: if (currentWeight > 0.5) { measuredGroundsWeight = currentWeight; console.log(`Grounds added: ${measuredGroundsWeight.toFixed(1)}g. Waiting manual tare.`); setState(State.WEIGHING_GROUNDS); } break; case State.READY_TO_POUR: if (weight > 0.1) { console.log("Water detected, starting timer and pour..."); startTimer(); startPourSimulation(); setState(State.POURING); } break; case State.POURING: console.log("Adding more water during pour..."); startPourSimulation(true); break; } updateUI(); }
@@ -392,7 +502,7 @@
                 hintBar.classList.remove('long-press-active');
                 let hintTextVal = '';
                 switch (currentState) {
-                    case State.INIT: hintTextVal = "等待放置..."; break;
+                    case State.INIT: hintTextVal = "旋转切换单位"; break;
                     case State.WAITING_FILTER: hintTextVal = "等待放置..."; break;
                     case State.FILTER_PLACED: hintTextVal = "旋转切换单位, 短按TARE去皮"; break;
                     case State.WAITING_GROUNDS: hintTextVal = "等待加入..."; break;
@@ -401,7 +511,7 @@
                     case State.POURING: hintTextVal = "短按停止计时"; break;
                     case State.FINISHED: hintTextVal = "短按复位 / 拿走滤杯"; break;
                     case State.WEIGHING_LIQUID: hintTextVal = "短按 TARE 复位"; break;
-                    case State.WAITING_CARAFE: hintTextVal = "请放上咖啡量杯壶"; break;
+                    case State.WAITING_CARAFE: hintTextVal = "旋转切换单位"; break;
                     default: hintTextVal = "手冲咖啡模式"; 
                 }
                 hintBar.textContent = hintTextVal;
@@ -446,7 +556,7 @@
             setState(State.INIT); 
             if (hintBar) { 
             }
-            if (statusPrompt) statusPrompt.textContent = "等待放置..."; 
+            if (statusPrompt) statusPrompt.textContent = "请放上咖啡量杯壶"; 
         });
     </script>
 

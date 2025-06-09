@@ -83,7 +83,7 @@
         </div>
 
         <div id="hint-bar" class="hint-bar">
-            旋转选择模式, 短按确认
+            旋转选择｜短按确认
         </div>
     </div>
 
@@ -214,7 +214,7 @@
             longPressActive = false; if (longPressTimer) { cancelAnimationFrame(longPressTimer); longPressTimer = null; }
             if (hintBar) {
                 hintBar.classList.remove('long-press-active');
-                hintBar.textContent = "旋转选择模式, 短按确认"; 
+                hintBar.textContent = "旋转选择｜短按确认"; 
             }
             if (statusPrompt) statusPrompt.textContent = "咖啡秤模式"; 
 
@@ -253,7 +253,7 @@
         // --- Initialization ---
         window.addEventListener('load', () => {
             updateCarousel(false); // Initial carousel setup
-            if (hintBar) hintBar.textContent = "旋转选择模式, 短按确认";
+            if (hintBar) hintBar.textContent = "旋转选择｜短按确认";
             if (statusPrompt) statusPrompt.textContent = "咖啡秤模式";
             // Ensure carousel transition is enabled after initial positioning
             setTimeout(() => {
