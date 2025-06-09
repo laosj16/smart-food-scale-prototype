@@ -14,7 +14,7 @@
             color: #1f2937; /* Darker text for better readability */
         }
         .page-container {
-            max-width: 700px; /* Slightly narrower for better focus */
+            max-width: 1100px; /* Increased for two columns */
             margin: 2rem auto; /* Increased top/bottom margin */
             background-color: #ffffff;
             padding: 2rem; /* Consistent padding */
@@ -117,6 +117,41 @@
             font-size: 1rem;
             margin-bottom: 0.25rem;
         }
+        .description-column {
+            background-color: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+        .description-column h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #111827;
+        }
+        .description-column p {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+            color: #374151;
+        }
+        .description-column ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .description-column > ul > li {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .description-column ul ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-top: 0.5rem;
+            font-weight: 400;
+        }
+        .description-column ul ul li {
+            margin-bottom: 0.25rem;
+            color: #4b5563;
+        }
         .language-toggle-button {
             display: block;
             margin: 1rem auto 2rem; /* Center button and add margin */
@@ -140,44 +175,64 @@
         <h1>智能食物秤 Pro - 交互原型</h1>
         <p class="subtitle">产品中心 - 胡中华</p>
         
-        <h2>原型页面结构:</h2>
-        <div style="display: flex; justify-content: space-between;">
-            <ul class="tree" style="width: 48%;">
-                <li>
-                    <a href="main_menu.html" data-lang-zh="主菜单" data-lang-en="Main Menu">主菜单</a>
-                    <ul>
-                        <li><a href="general_weighing.html" data-lang-zh="通用称重" data-lang-en="General Weighing">通用称重</a></li>
+        <div style="display: flex; gap: 2rem;">
+            <div style="flex: 1;">
+                <h2>原型页面结构:</h2>
+                <div style="display: flex; justify-content: space-between;">
+                    <ul class="tree" style="width: 48%;">
                         <li>
-                            <a href="coffee_scale_menu.html" data-lang-zh="咖啡秤" data-lang-en="Coffee Scale">咖啡秤</a>
+                            <a href="main_menu.html" data-lang-zh="主菜单" data-lang-en="Main Menu">主菜单</a>
                             <ul>
-                                <li><a href="coffee_pour_over.html" data-lang-zh="手冲模式 1" data-lang-en="Pour Over Mode 1">手冲模式 1</a></li>
-                                <li><a href="coffee_pour_over_2.html" data-lang-zh="手冲模式 2" data-lang-en="Pour Over Mode 2">手冲模式 2</a></li>
-                                <li><a href="coffee_espresso.html" data-lang-zh="意式模式 1" data-lang-en="Espresso Mode 1">意式模式 1</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="nutrition_scale_connect_app.html" data-lang-zh="营养秤连接App" data-lang-en="Nutrition Scale Connect App">营养秤连接App</a></li>
-                        <li><a href="nutrition_scale.html" data-lang-zh="营养秤" data-lang-en="Nutrition Scale">营养秤</a></li>
-                        <li><a href="timed_weighing.html" data-lang-zh="倒计时" data-lang-en="Timer">倒计时</a></li>
-                        <li>
-                            <a href="settings_menu.html" data-lang-zh="设置" data-lang-en="Settings">设置</a>
-                            <ul>
-                                <li><a href="settings_language.html" data-lang-zh="语言设置" data-lang-en="Language Settings">语言设置</a></li>
-                                <li><a href="settings_factory_reset.html" data-lang-zh="恢复出厂设置" data-lang-en="Factory Reset">恢复出厂设置</a></li>
-                                <li><a href="settings_about.html" data-lang-zh="关于设备" data-lang-en="About Device">关于设备</a></li>
+                                <li><a href="general_weighing.html" data-lang-zh="通用称重" data-lang-en="General Weighing">通用称重</a></li>
+                                <li>
+                                    <a href="coffee_scale_menu.html" data-lang-zh="咖啡秤" data-lang-en="Coffee Scale">咖啡秤</a>
+                                    <ul>
+                                        <li><a href="coffee_pour_over.html" data-lang-zh="手冲模式 1" data-lang-en="Pour Over Mode 1">手冲模式 1</a></li>
+                                        <li><a href="coffee_pour_over_2.html" data-lang-zh="手冲模式 2" data-lang-en="Pour Over Mode 2">手冲模式 2</a></li>
+                                        <li><a href="coffee_espresso.html" data-lang-zh="意式模式 1" data-lang-en="Espresso Mode 1">意式模式 1</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="nutrition_scale_connect_app.html" data-lang-zh="营养秤连接App" data-lang-en="Nutrition Scale Connect App">营养秤连接App</a></li>
+                                <li><a href="nutrition_scale.html" data-lang-zh="营养秤" data-lang-en="Nutrition Scale">营养秤</a></li>
+                                <li><a href="timed_weighing.html" data-lang-zh="倒计时" data-lang-en="Timer">倒计时</a></li>
+                                <li>
+                                    <a href="settings_menu.html" data-lang-zh="设置" data-lang-en="Settings">设置</a>
+                                    <ul>
+                                        <li><a href="settings_language.html" data-lang-zh="语言设置" data-lang-en="Language Settings">语言设置</a></li>
+                                        <li><a href="settings_factory_reset.html" data-lang-zh="恢复出厂设置" data-lang-en="Factory Reset">恢复出厂设置</a></li>
+                                        <li><a href="settings_about.html" data-lang-zh="关于设备" data-lang-en="About Device">关于设备</a></li>
+                                    </ul>
+                                </li>
                             </ul>
                         </li>
                     </ul>
-                </li>
-            </ul>
-            <ul class="tree" style="width: 48%;">
-                <li> <span class="category-title">电量与充电模拟:</span>
-                    <ul>
-                        <li><a href="low_battery.html" data-lang-zh="低电量与关机" data-lang-en="Low Battery & Shutdown">低电量与关机</a></li>
-                        <li><a href="Power_off.html" data-lang-zh="返回与关机演示" data-lang-en="Return & Shutdown Demo">返回与关机演示</a></li>
-                        <li><a href="charging_status.html" data-lang-zh="充电状态" data-lang-en="Charging Status">充电状态</a></li>
+                    <ul class="tree" style="width: 48%;">
+                        <li> <span class="category-title">状态及模拟:</span>
+                            <ul>
+                                <li><a href="low_battery.html" data-lang-zh="低电量与关机" data-lang-en="Low Battery & Shutdown">低电量与关机</a></li>
+                                <li><a href="Power_off.html" data-lang-zh="返回与关机演示" data-lang-en="Return & Shutdown Demo">返回与关机演示</a></li>
+                                <li><a href="charging_status.html" data-lang-zh="充电状态" data-lang-en="Charging Status">充电状态</a></li>
+                                <li><a href="overload_prompt.html" data-lang-zh="超载提示" data-lang-en="Overload Prompt">超载提示</a></li>
+                            </ul>
+                        </li>
                     </ul>
-                </li>
-            </ul>
+                </div>
+            </div>
+            <div class="description-column" style="width: 400px; flex-shrink: 0;">
+                <h3>通用交互逻辑 (适用于所有模式)</h3>
+                <p>在进一步说明各个模式之前，以下是一些贯穿所有模式的通用交互方式：</p>
+                <ul>
+                    <li>长按按旋钮 :
+                        <ul>
+                            <li>激活长按计时。</li>
+                            <li>底部提示栏会显示类似 "长按*s 后将关机，现在松开旋钮返回上一级菜单" 的动态提示。</li>
+                            <li>在1秒到5秒（不含5秒）之间松开：返回到上一级菜单。</li>
+                            <li>持续按住达到或超过5秒：设备将直接关机。</li>
+                            <li>在1秒内松开：取消长按操作。</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 
