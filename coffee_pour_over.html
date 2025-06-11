@@ -127,6 +127,7 @@
         const bottomLeftUnit = document.getElementById('bottom-left-unit');
         const bottomRightLabel = document.getElementById('bottom-right-label');
         const bottomRightValue = document.getElementById('bottom-right-value');
+        const bottomRightUnit = document.getElementById('bottom-right-unit');
         const hintBar = document.getElementById('hint-bar');
         const tareIndicator = document.getElementById('tare-indicator');
         const ratioInfoItem = ratioValue.closest('.info-item');
@@ -384,28 +385,28 @@
                 bottomRightUnit.textContent = groundsFormatted.unit;
 
                 if (currentState === State.WEIGHING_LIQUID) {
-                    const liquidFormatted = formatWeight(coffeeLiquidWeight);
                     const removedFormatted = formatWeight(removedWeight);
                     const totalWaterFormatted = formatWeight(totalWaterWeight);
                     const finalRatio = (grounds > 0 && coffeeLiquidWeight > 0) ? (coffeeLiquidWeight / grounds) : 0;
 
-                    ratioLabel.textContent = "最终粉液比";
+                    ratioLabel.textContent = "粉液比";
                     ratioValue.textContent = finalRatio > 0 ? `1:${finalRatio.toFixed(1)}` : '--';
                     ratioInfoItem.className = 'info-item bg-ratio';
 
-                    timeInfoItem.className = 'info-item bg-liquid';
-                    timeInfoItem.querySelector('.info-label').textContent = "咖啡液重";
-                    timeInfoItem.querySelector('.info-value').innerHTML = `${liquidFormatted.value}<span class="info-unit">${liquidFormatted.unit}</span>`;
+                    timeInfoItem.className = 'info-item bg-time';
+                    timeInfoItem.querySelector('.info-label').textContent = "时间";
+                    timeInfoItem.querySelector('.info-value').textContent = formatTime(timerSeconds);
 
-                    bottomLeftLabel.textContent = "总注水量";
-                    bottomLeftInfoItem.className = 'info-item bg-total-water';
-                    bottomLeftValue.textContent = totalWaterFormatted.value;
-                    bottomLeftUnit.textContent = totalWaterFormatted.unit;
+                    // 调整：左下角显示“移走重量”，右下角显示“总注水量”
+                    bottomLeftLabel.textContent = "移走重量";
+                    bottomLeftInfoItem.className = 'info-item bg-removed';
+                    bottomLeftValue.textContent = removedFormatted.value;
+                    bottomLeftUnit.textContent = removedFormatted.unit;
 
-                    bottomRightLabel.textContent = "移走重量";
-                    bottomRightInfoItem.className = 'info-item bg-removed';
-                    bottomRightValue.textContent = removedFormatted.value;
-                    bottomRightUnit.textContent = removedFormatted.unit;
+                    bottomRightLabel.textContent = "总注水量";
+                    bottomRightInfoItem.className = 'info-item bg-total-water';
+                    bottomRightValue.textContent = totalWaterFormatted.value;
+                    bottomRightUnit.textContent = totalWaterFormatted.unit;
                 } else {
                     ratioLabel.textContent = "水粉比";
                     ratioInfoItem.className = 'info-item bg-ratio';
